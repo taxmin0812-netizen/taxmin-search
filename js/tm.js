@@ -155,7 +155,18 @@
     };
     /* 키보드 초점이 시연 안에 있으면 자동 넘김을 멈춘다(마우스로 누른 초점은 빼고) */
     var kbIn = function () { var a = doc.activeElement; try { return !!(a && show.contains(a) && a.matches(':focus-visible')); } catch (x) { return false; } };
-    var scr = $('.screen', show);
+    var scr = $('.screen', show), cuT = 0;
+    /* 보고서 장면: 금액이 0 에서 올라감(예시 금액) */
+    var countUp = function (el) {
+      var to = +el.getAttribute('data-to'), suf = el.getAttribute('data-suf') || '', c0 = performance.now();
+      if (!to) return;
+      el.textContent = '0' + suf;
+      (function st(now) {
+        var p = Math.min(1, (now - c0) / 1100), k = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(to * k).toLocaleString('ko-KR') + suf;
+        if (p < 1) requestAnimationFrame(st);
+      })(c0);
+    };
     var go = function (i, user) {
       var prev = cur, back = i < cur && !(cur === scenes.length - 1 && i === scenes.length);
       cur = (i + scenes.length) % scenes.length;
@@ -169,6 +180,9 @@
       });
       tabs.forEach(function (b, k) { b.setAttribute('aria-pressed', k === cur ? 'true' : 'false'); b.style.removeProperty('--p'); });
       caps.forEach(function (c, k) { c.hidden = k !== cur; });
+      clearTimeout(cuT);
+      var rvEl = !still && $('.report .v[data-to]', scenes[cur]);
+      if (rvEl) cuT = setTimeout(function () { countUp(rvEl); }, 450);
       if (!still && $('.bub', scenes[cur])) { chatPlay(scenes[cur]); if (video && video.src) { try { video.currentTime = 0; } catch (x) {} } }
       t0 = performance.now();
       if (user) held = paused || kbIn();   /* 멈춘 채 탭·밀기를 해도 멈춤은 그대로 */
@@ -267,11 +281,18 @@
     var renderCalc = function () {
       var R = compute();
       var hint = !S.ind ? '업종부터 골라 주세요.' : R.corp ? '' : !S.rev ? '작년 매출을 고르면 더 정확해져요.' : !S.emp ? '직원 수를 고르면 확정돼요.' : '';
+      var g0 = IND_G[S.ind], bb0 = BAND[g0];
+      var base = !S.ind ? '' : R.corp ? '법인 · 장부 상태와 거래량을 보고 확정' : R.ind + ' · 작년 매출 ' + R.rev + ' · 4대보험 직원 ' + R.emp;
+      var chg = (S.ind && !R.corp && S.rev === 'lo' && S.emp === '3' && bb0) ? '작년 매출이 ' + bb0.lo + '을 넘거나 직원이 4명 이상이면 달라져요. 위에서 바꿔 눌러 보세요.' : '';
       cres.innerHTML = '<p class="lbl">예상 기장료' + (R.tier ? ' · ' + esc(R.tier) : '') + '</p>' +
         '<p class="price num">' + esc(R.price) + '<small>부가세 별도</small></p>' +
         (S.ind ? '<p class="incl num">' + inclLine(R) + '</p>' : '') +
         (R.why ? '<p class="why">' + esc(R.why) + '</p>' : '') +
-        (hint ? '<p class="incl">' + hint + '</p>' : '');
+        (hint ? '<p class="incl">' + hint + '</p>' : '') +
+        (S.ind ? '<dl class="cd-dl"><div><dt>기준</dt><dd>' + esc(base) + '</dd></div>' +
+          '<div><dt>포함</dt><dd>장부 정리 · 부가세 신고 · 직원 월급 신고 · 매달 매출 보고서</dd></div>' +
+          '<div><dt>별도</dt><dd>' + (R.corp ? '법인세' : '종합소득세') + ' 신고비(1년에 한 번, 신고 전에 금액을 먼저 알려 드려요)</dd></div>' +
+          (chg ? '<div><dt>달라지면</dt><dd>' + esc(chg) + '</dd></div>' : '') + '</dl>' : '');
       cres.classList.toggle('done', R.done);
       if (!still) { cres.classList.remove('pop'); void cres.offsetWidth; cres.classList.add('pop'); }
       /* 카톡에 붙여 넣는 글: 검색어는 넣지 않고 짧은 안내 번호만(N 네이버 광고 · G 구글 광고 · W 그 밖 - 쪽 이름) */
@@ -316,8 +337,14 @@
   /* ── 업종 흐름띠: 칩을 한 벌 더 붙여 끝없이 흐르게(움직임 줄이기·캡처는 멈춘 채 여러 줄) · 화면 밖이면 멈춤 */
   var marq = $('.marq');
   if (marq && !still) {
-    $$('.mtrack', marq).forEach(function (t) { t.innerHTML += t.innerHTML; });
     root.classList.add('js-mq');
+    var mqW = Math.max(window.innerWidth || 0, 1280);
+    $$('.mtrack', marq).forEach(function (t, k) {
+      var one = t.innerHTML, n = 1;
+      while (t.scrollWidth < mqW && n < 8) { t.innerHTML += one; n++; }
+      t.innerHTML += t.innerHTML;   /* 두 벌: -50% 이동이 끊김 없이 */
+      t.style.animationDuration = Math.round(t.scrollWidth / 2 / (k ? 36 : 42)) + 's';
+    });
     var mqVis = false, mqHold = false;
     /* 화면 밖·첫 화면 멈춤 단추·마우스 올림·손가락으로 누르고 있을 때는 멈춤 */
     mqSet = function () { var on = mqVis && !mqHold && !paused; $$('.mtrack', marq).forEach(function (t) { t.style.animationPlayState = on ? 'running' : 'paused'; }); };

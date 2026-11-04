@@ -861,3 +861,337 @@ dialog.sheet::backdrop { background: rgba(11, 21, 48, .55); }
 @media (min-width: 1024px) {
   .hincl ul { justify-content: flex-start; }
 }
+
+/* ── 7차: 정렬 하나로(대표님 11/4 밤 "텍스트 정렬이 개판") — 모든 글은 왼쪽 맞춤, 같은 왼쪽 선(휴대폰 20px · PC 콘텐츠 왼쪽) */
+.hero, .sec-h, .strip-t, .tp-in, .closing, .marq-note, .stats-note, .ch-note, .cond { text-align: left; }
+.lede, .hero .lede, .sec-h .lede { margin-left: 0; margin-right: 0; }
+.cta, .hero .cta, .closing .cta { margin-left: 0; margin-right: 0; justify-content: flex-start; }
+.cond, .hincl, .stats, .stats-note { margin-left: 0; margin-right: 0; }
+.hincl ul { justify-content: flex-start; }
+.tp-in .shield { margin: 0 0 14px; }
+.ch-note .ch-tel { margin-left: 0; margin-right: 0; }
+.hd { padding-left: 8px; padding-right: 8px; }
+.hd .bar { padding-left: 12px; padding-right: 6px; }
+@media (min-width: 960px) {
+  .cta, .hero .cta, .closing .cta { justify-content: flex-start; }
+  .hd { padding-left: 20px; padding-right: 20px; }
+  .hd .bar { max-width: 1200px; padding-left: 20px; padding-right: 20px; }
+}
+@media (min-width: 1024px) {
+  .hero-grid { padding: 0 20px; }
+}
+
+/* ── 7차: 기장료 계산 자세히 — 정하는 기준 세 가지 · 결과에 기준/포함/별도/달라지면 */
+.cc-how { list-style: none; margin: 20px 0 0; padding: 0; counter-reset: how; display: grid; gap: 14px; }
+.cc-how li { counter-increment: how; position: relative; padding-left: 34px; font-size: 15px; line-height: 1.6; color: var(--sub); }
+.cc-how li::before { content: counter(how); position: absolute; left: 0; top: 1px; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: #fff; font-size: 13px; font-weight: 800; line-height: 24px; text-align: center; }
+.cc-how b { display: block; font-size: 16px; color: var(--ink); }
+.cc-how + .cc-price { margin-top: 24px; }
+.cc-price { gap: 0; }
+.cd-dl { margin: 12px 0 0; padding: 12px 0 0; border-top: 1px solid #D7DEEA; display: grid; gap: 6px; text-align: left; }
+.cd-dl div { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px; font-size: 14px; line-height: 1.55; }
+.cd-dl dt { font-weight: 800; color: var(--b-d); }
+.cd-dl dd { margin: 0; color: var(--ink-2); }
+
+/* ── 7차: 모션 업그레이드(되풀이 없음 — 보일 때 한 번) */
+@keyframes ck-draw { to { stroke-dashoffset: 0; } }
+@keyframes pop-in { 0% { opacity: 0; transform: translateY(14px) scale(.94); } 70% { opacity: 1; transform: translateY(-2px) scale(1.01); } 100% { opacity: 1; transform: none; } }
+/* 제목: 아래에서 밀려 올라오며 드러남 */
+/* 지켜보는 대상(.rv) 자신에는 걸지 않음 — 가려지면 브라우저가 안 보인다고 판단해 끝내 등장하지 않음 */
+.js-rv .rv .big { clip-path: inset(0 0 100% 0); transform: translateY(22px); transition: clip-path .9s var(--ease), transform .9s var(--ease); }
+.js-rv .rv.in .big { clip-path: inset(0 0 0 0); transform: none; }
+/* 체크 표시가 차례로 그려짐(첫 화면 포함 · 서비스 포함 목록) */
+.js-rv .hincl li svg path[d^="M5 12.5"] { stroke-dasharray: 21; stroke-dashoffset: 21; animation: ck-draw .45s var(--ease) forwards; }
+.js-rv .hincl li:nth-child(1) svg path { animation-delay: .55s; }
+.js-rv .hincl li:nth-child(2) svg path { animation-delay: .68s; }
+.js-rv .hincl li:nth-child(3) svg path { animation-delay: .81s; }
+.js-rv .hincl li:nth-child(4) svg path { animation-delay: .94s; }
+.js-rv .incl-box.rv li { opacity: 0; transform: translateX(-10px); transition: opacity .5s var(--ease), transform .6s var(--ease); }
+.js-rv .incl-box.rv.in li { opacity: 1; transform: none; }
+.js-rv .incl-box.rv li svg path[d^="M5 12.5"] { stroke-dasharray: 21; stroke-dashoffset: 21; transition: stroke-dashoffset .45s var(--ease); }
+.js-rv .incl-box.rv.in li svg path[d^="M5 12.5"] { stroke-dashoffset: 0; }
+.js-rv .incl-box.rv.in li:nth-child(2), .js-rv .incl-box.rv.in li:nth-child(2) svg path { transition-delay: .08s; }
+.js-rv .incl-box.rv.in li:nth-child(3), .js-rv .incl-box.rv.in li:nth-child(3) svg path { transition-delay: .16s; }
+.js-rv .incl-box.rv.in li:nth-child(4), .js-rv .incl-box.rv.in li:nth-child(4) svg path { transition-delay: .24s; }
+.js-rv .incl-box.rv.in li:nth-child(5), .js-rv .incl-box.rv.in li:nth-child(5) svg path { transition-delay: .32s; }
+.js-rv .incl-box.rv.in li:nth-child(6), .js-rv .incl-box.rv.in li:nth-child(6) svg path { transition-delay: .40s; }
+/* 기장료 계산 판: 기준·가격 줄이 차례로, 업종 버튼이 차례로 튀어나옴 */
+.js-rv .calc-cta.rv .cc-how li, .js-rv .calc-cta.rv .cc-price li { opacity: 0; transform: translateX(-12px); transition: opacity .5s var(--ease), transform .6s var(--ease); }
+.js-rv .calc-cta.rv.in .cc-how li, .js-rv .calc-cta.rv.in .cc-price li { opacity: 1; transform: none; }
+.js-rv .calc-cta.rv.in .cc-how li:nth-child(2) { transition-delay: .1s; }
+.js-rv .calc-cta.rv.in .cc-how li:nth-child(3) { transition-delay: .2s; }
+.js-rv .calc-cta.rv.in .cc-price li:nth-child(1) { transition-delay: .3s; }
+.js-rv .calc-cta.rv.in .cc-price li:nth-child(2) { transition-delay: .4s; }
+.js-rv .calc-cta.rv .cc-inds button { opacity: 0; transform: translateY(12px) scale(.94); }
+.js-rv .calc-cta.rv.in .cc-inds button { animation: pop-in .6s var(--ease) forwards; }
+.js-rv .calc-cta.rv.in .cc-inds button:nth-child(2) { animation-delay: .08s; }
+.js-rv .calc-cta.rv.in .cc-inds button:nth-child(3) { animation-delay: .16s; }
+.js-rv .calc-cta.rv.in .cc-inds button:nth-child(4) { animation-delay: .24s; }
+.js-rv .calc-cta.rv.in .cc-inds button:nth-child(5) { animation-delay: .32s; }
+/* 시작 3단계: 번호가 차례로 켜지고 다음 단계로 이어지는 선이 그어짐 */
+.steps li .st-n { z-index: 1; }
+.steps li:not(:last-child)::after { content: ""; position: absolute; left: 14px; top: 36px; bottom: -22px; width: 2px; border-radius: 2px; background: rgba(255, 255, 255, .4); transform-origin: top; }
+.js-rv .tpanel .steps .st-n { opacity: 0; transform: scale(.4); transition: opacity .3s var(--ease), transform .55s cubic-bezier(.34, 1.56, .64, 1); }
+.js-rv .tpanel.in .steps .st-n { opacity: 1; transform: none; }
+.js-rv .tpanel .steps li:not(:last-child)::after { transform: scaleY(0); transition: transform .7s var(--ease); }
+.js-rv .tpanel.in .steps li:not(:last-child)::after { transform: none; }
+.js-rv .tpanel.in .steps li:nth-child(1)::after { transition-delay: .35s; }
+.js-rv .tpanel.in .steps li:nth-child(2) .st-n { transition-delay: .55s; }
+.js-rv .tpanel.in .steps li:nth-child(2)::after { transition-delay: .8s; }
+.js-rv .tpanel.in .steps li:nth-child(3) .st-n { transition-delay: 1s; }
+/* 시연 알림: 탄력 있게 들어오고 체크가 그려짐 */
+.play .scene.on .noti { animation-name: pop-in; animation-duration: .6s; }
+.play .scene.on .noti .ic svg path[d^="M5 12.5"] { stroke-dasharray: 21; stroke-dashoffset: 21; animation: ck-draw .45s var(--ease) .35s forwards; }
+.play .scene.on .noti.d2 .ic svg path { animation-delay: 1.45s; }
+.play .scene.on .noti.d3 .ic svg path { animation-delay: 2.35s; }
+.steps { gap: 28px; }
+@media (min-width: 720px) {
+  .steps li:not(:last-child)::after { left: 40px; right: -22px; top: 14px; bottom: auto; width: auto; height: 2px; transform-origin: left; }
+  .js-rv .tpanel .steps li:not(:last-child)::after { transform: scaleX(0); }
+  .steps { gap: 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .js-rv .rv .big { clip-path: none !important; transform: none !important; }
+  .js-rv .hincl li svg path[d^="M5 12.5"], .js-rv .incl-box.rv li svg path[d^="M5 12.5"], .play .scene .noti .ic svg path[d^="M5 12.5"] { stroke-dashoffset: 0 !important; animation: none !important; }
+  .js-rv .incl-box.rv li, .js-rv .calc-cta.rv .cc-how li, .js-rv .calc-cta.rv .cc-price li, .js-rv .calc-cta.rv .cc-inds button, .js-rv .tpanel .steps .st-n { opacity: 1 !important; transform: none !important; animation: none !important; }
+  .js-rv .tpanel .steps li::after { transform: none !important; }
+}
+
+/* ── 7차: 덜어 내기(대표님 "한 화면에 너무 많아") — 첫 화면 버튼 2개 · 조건 한 줄 */
+.hero .cta { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
+.hero .cta .btn-primary { grid-column: auto; }
+/* 조건 줄: 세 조각을 이어 쓰고, 줄이 넘어가도 '·' 로 시작하지 않게 점은 앞 조각 끝에(옛 휴대폰 규칙 덮어씀) */
+.cond span, .cond span:first-child { display: inline; white-space: nowrap; }
+.cond span::before, .cond span + span::before, .cond span + span + span::before, .cond span:nth-child(2)::before { content: none; }
+.cond span:not(:last-child)::after { content: " ·"; margin-right: 4px; }
+.hincl { margin-top: 18px; }
+@media (min-width: 960px) {
+  .hero .cta .btn-tel { order: 0; flex-basis: auto; justify-content: center; min-height: 52px; padding: 0 22px; background: var(--paper); box-shadow: inset 0 0 0 1px #D3D8E0; color: var(--ink); font-size: 17px; }
+  .hero .cta .btn-tel:hover { color: var(--ink); box-shadow: inset 0 0 0 1px #A9B2BF; }
+}
+
+/* ── 7차: 서비스 소개 = 같은 크기 칸 4개 + 넓은 칸 1개(대표님 샘플) — 짧은 제목 + 한 줄 설명 */
+.svc { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 12px; }
+.svc-pic { aspect-ratio: 4 / 3; border-radius: 18px; overflow: hidden; background: #E3EAF6; }
+.svc-pic img, .svc-pic video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.svc-receipt img, .svc-receipt video { object-position: 62% 50%; }
+.svc-i h3, .svc-plus h3 { margin: 14px 0 0; font-size: 18px; line-height: 1.35; letter-spacing: -.03em; }
+.svc-i p, .svc-plus p { margin: 4px 0 0; font-size: 15px; line-height: 1.5; color: var(--sub); }
+.svc-plus { display: grid; grid-template-columns: calc((100% - 12px) / 2) minmax(0, 1fr); gap: 0 14px; align-items: center; margin-top: 28px; }
+.svc-plus h3 { margin-top: 0; }
+.js-rv .svc-i.rv .svc-pic img, .js-rv .svc-plus.rv .svc-pic img { transform: scale(1.08); transition: transform 1.4s var(--ease); }
+.js-rv .svc-i.rv.in .svc-pic img, .js-rv .svc-plus.rv.in .svc-pic img { transform: none; }
+.js-rv .svc .svc-i.rv:nth-child(2) { transition-delay: .08s; }
+.js-rv .svc .svc-i.rv:nth-child(3) { transition-delay: .16s; }
+.js-rv .svc .svc-i.rv:nth-child(4) { transition-delay: .24s; }
+@media (min-width: 960px) {
+  .svc { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+  .svc-pic { border-radius: 24px; }
+  .svc-i h3, .svc-plus h3 { margin-top: 18px; font-size: 20px; }
+  .svc-i p, .svc-plus p { font-size: 16px; }
+  .svc-plus { grid-template-columns: calc((100% - 72px) / 4) minmax(0, 1fr); gap: 0 24px; margin-top: 40px; }
+  .svc-plus h3 { margin-top: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .js-rv .svc-i.rv .svc-pic img, .js-rv .svc-plus.rv .svc-pic img { transform: none !important; }
+}
+
+/* ── 8차(11/4 밤): 글 배치·간격 = 네이버 웍스·삼쩜삼 공통 규칙
+   대표님 "왼쪽 맞춤이 아니라 네이버웍스나 삼쩜삼 등과 동일한 텍스트 간격을 유지해" → 위 7차 '정렬 하나로(모두 왼쪽)'를 이 덩어리가 덮어씀
+   고르는 법: 두 곳이 같으면 그 값, 다르면 더 많은 구획에서 쓰인 값(같으면 네이버 웍스). 간격은 모두 상자 기준(앞 요소 아래 끝 → 다음 요소 위 끝)
+   정렬: 휴대폰 = 첫 화면·구획 머리·카톡 판·마무리 가운데 / PC = 한 칸 구획 머리·마무리 가운데,
+         두 칸으로 나뉜 글 칸(1024px 이상 첫 화면 글 · 960px 이상 기장료 계산·카톡 판 · 720px 이상 질문 옆 제목)은 왼쪽(네이버 웍스 PC 첫 화면·한 플랫폼·보안 꼴)
+         카드·목록·단계·가격 줄·질문 목록·예약 폼 안 글은 늘 왼쪽(두 곳 모두)
+   글자: 굵기 700·400 두 단계 · 자간 -0.5px 고정(네이버 웍스) · 글자 색·문구·꾸밈 상자 없음·상단 버튼은 그대로 */
+
+/* 1. 콘텐츠 폭·구획 여백 — 휴대폰 좌우 16(네이버 웍스 358 폭) · 구획 위아래 60(네이버 웍스 60·삼쩜삼 약 61~68) / PC 100(삼쩜삼 약 100~125·네이버 웍스 아래 100~118) · PC 콘텐츠 1285(네이버 웍스) */
+.sec { padding-block: 60px; }
+@media (max-width: 959px) {
+  .wrap, .hero-txt, .show-cap, .ex-label { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .hd .bar { padding-left: 8px; }   /* 로고도 같은 16 선에 */
+}
+@media (min-width: 960px) {
+  .sec { padding-block: 100px; }
+}
+@media (min-width: 1024px) {
+  .wrap:not(.narrow), .hero-grid, .hd .bar { max-width: 1325px; }   /* 콘텐츠 1285 + 좌우 20 */
+}
+
+/* 2. 글자 역할(모든 구획 공통) — 구획 제목 26/700/36 · PC 48/700/64 / 머리말 16/700/28, 제목에 바로 붙임(간격 0) / 구획 설명 16/400/28 · PC 18/400/28, 폭 512 이하 */
+.big:not(.policy-h) { font-size: 26px; line-height: 36px; font-weight: 700; letter-spacing: -.5px; }
+.big .eb { margin-bottom: 0; font-size: 16px; line-height: 28px; font-weight: 700; letter-spacing: -.5px; }
+.lede { font-size: 16px; line-height: 28px; letter-spacing: -.5px; text-wrap: balance; }
+@media (min-width: 960px) {
+  .big:not(.policy-h) { font-size: 48px; line-height: 64px; }
+  .lede { font-size: 18px; line-height: 28px; max-width: 512px; }
+}
+
+/* 3. 구획 머리(한 칸): 가운데 · 제목→설명 16/30 · 머리→첫 내용 30/50 */
+.sec-h { text-align: center; margin: 0 auto 30px; }
+.sec-h .lede { margin: 16px auto 0; }
+@media (min-width: 960px) {
+  .sec-h { margin-bottom: 50px; }
+  .sec-h .lede { margin-top: 30px; }
+}
+
+/* 4. 첫 화면 — 휴대폰·태블릿 가운데 / 1024px 이상은 글 칸 왼쪽(시연 판과 세로 가운데)
+   머리줄→첫 글 40 · 배지→제목 10 · 제목 32/700/42 · 제목→설명 10 · 설명(기장료 포함 2열) 16/400/24 · →버튼 44 · 버튼 사이 10 · →조건 10 · →시연 68 · 아래 44
+   PC: 제목 56/700/70 · 배지→제목 14 · 제목→설명 14 · 설명 18/400/28 · →버튼 30 · →조건 20 · 아래 28 */
+.hero { text-align: center; padding-bottom: 44px; }
+@media (max-width: 959px) { .hero { padding-top: 40px; } }
+.hbadge { margin: 0 0 10px; font-size: 16px; font-weight: 700; letter-spacing: -.5px; }
+.hero h1 { font-size: 32px; line-height: 42px; font-weight: 700; letter-spacing: -.5px; }
+.hero .hincl, .hero .lede { margin: 10px auto 0; }
+.hero .lede { line-height: 24px; }
+.hincl ul { display: grid; grid-template-columns: repeat(2, max-content); justify-content: center; gap: 6px 24px; }
+.hincl li { padding: 0; font-size: 16px; line-height: 24px; font-weight: 400; letter-spacing: -.5px; }
+.cta, .hero .cta, .closing .cta { margin-left: auto; margin-right: auto; justify-content: center; gap: 10px; }
+.hero .cta { margin-top: 44px; }
+.hero .cond { margin: 10px auto 0; text-align: center; font-size: 14px; line-height: 20px; letter-spacing: -.5px; text-wrap: balance; }
+.hero .hours-note { margin-top: 4px; font-size: 14px; line-height: 20px; font-weight: 400; letter-spacing: -.5px; }
+@media (max-width: 1023px) { .show { margin-top: 68px; } }
+@media (min-width: 960px) {
+  .hero { padding-bottom: 28px; }
+  .hbadge { margin-bottom: 14px; }
+  .hero h1 { font-size: 56px; line-height: 70px; }
+  .hero .hincl, .hero .lede { margin-top: 14px; }
+  .hero .lede { line-height: 28px; }
+  .hincl li { font-size: 18px; line-height: 28px; }
+  .cta, .hero .cta, .closing .cta { justify-content: center; }
+  .hero .cta { margin-top: 30px; }
+  .hero .cond { margin-top: 20px; font-size: 16px; line-height: 28px; }
+  .hero .hours-note { font-size: 16px; line-height: 28px; }
+}
+@media (min-width: 1024px) {
+  .hero { text-align: left; }
+  .hero-txt { padding-top: max(0px, calc((var(--fh) - 440px) / 2)); }   /* 글 덩어리(약 400~460)를 시연 틀 높이 가운데에 */
+  .hero .hincl, .hero .lede, .hero .cond { margin-left: 0; margin-right: 0; }
+  .hincl ul { justify-content: start; }
+  .hero .cta { margin-left: 0; margin-right: 0; justify-content: flex-start; }
+  .hero .cond { text-align: left; }
+}
+
+/* 5. 누적 고객 띠: 가운데 · 위아래 60 / PC 위 160(첫 화면 다음 구획 = 네이버 웍스 '제품' 160)·아래 100 · 제목→흐름띠 30/50 · 흐름띠→각주 8 */
+.strip { padding: 60px 0; }
+.strip-t { text-align: center; margin: 0 auto 30px; }
+.strip .marq-note { margin: 8px 0 0; text-align: center; }
+@media (min-width: 960px) {
+  .strip { padding: 160px 0 100px; }
+  .strip-t { margin-bottom: 50px; }
+}
+
+/* 6. 작은 글(각주·안내) 14/400/20 · PC 16/400/28 */
+.strip .marq-note, .cc-txt .fine, .talk-kk .fine { font-size: 14px; line-height: 20px; letter-spacing: -.5px; text-wrap: balance; }
+@media (min-width: 960px) {
+  .strip .marq-note, .cc-txt .fine, .talk-kk .fine { font-size: 16px; line-height: 28px; }
+}
+
+/* 7. 서비스 소개 카드(카드 안 글은 왼쪽) — 그림→제목 14/24 · 제목 18/700/28 · PC 20/700/30 · 제목→설명 8 · 설명 16/400/28 · PC 16/400/26 · 카드 사이 16(세로 32) / PC 30 */
+.svc { gap: 32px 16px; }
+.svc-i h3, .svc-plus h3, .feat h3 { font-size: 18px; line-height: 28px; font-weight: 700; letter-spacing: -.5px; }
+.svc-i h3 { margin-top: 14px; }
+.svc-i p, .svc-plus p, .feat p { margin-top: 8px; font-size: 16px; line-height: 28px; letter-spacing: -.5px; }
+.svc-plus { grid-template-columns: calc((100% - 16px) / 2) minmax(0, 1fr); gap: 0 16px; margin-top: 32px; }
+@media (min-width: 960px) {
+  .svc { gap: 30px; }
+  .svc-i h3 { margin-top: 24px; }
+  .svc-i h3, .svc-plus h3, .feat h3 { font-size: 20px; line-height: 30px; }
+  .svc-i p, .svc-plus p, .feat p { line-height: 26px; }
+  .svc-plus { grid-template-columns: calc((100% - 90px) / 4) minmax(0, 1fr); gap: 0 30px; margin-top: 30px; }
+}
+
+/* 8. 기장료 계산 — 959px 이하 머리·각주·'업종을 눌러 보세요' 가운데 / 960px 이상 두 칸이라 글 칸 왼쪽 · 가격 줄은 늘 양끝 */
+.cc-price { margin-top: 30px; text-align: left; }
+.cc-price span { font-size: 16px; line-height: 28px; font-weight: 400; letter-spacing: -.5px; }
+.cc-price b { font-size: 24px; line-height: 34px; font-weight: 700; letter-spacing: -.5px; text-align: right; }
+.cc-price b small { font-size: 14px; font-weight: 400; letter-spacing: -.5px; }
+.cc-txt .fine { margin: 8px 0 0; }
+.cc-pick-t { margin: 0 0 8px; font-size: 16px; line-height: 28px; font-weight: 700; letter-spacing: -.5px; }
+@media (max-width: 959px) {
+  .calc-cta { row-gap: 44px; }
+  .cc-txt .big, .cc-txt .lede, .cc-txt .fine, .cc-pick-t { text-align: center; }
+  .cc-txt .lede { margin: 16px auto 0; }
+}
+@media (min-width: 960px) {
+  .cc-txt .lede { margin: 30px 0 0; }
+  .cc-price { margin-top: 50px; }
+  .cc-price span { font-size: 18px; }
+}
+
+/* 9. 시작 3단계(진한 판) — 머리 가운데 · 단계 글은 왼쪽 · 판 안 위아래 60/100 · 방패→머리말 14/20 · 머리→단계 30/50 · 단계 제목 18/700/28(PC 20/700/30) →설명 8 · 설명 16/400/28(PC 26) */
+.tp-in { text-align: center; padding: 60px 24px; }
+.tp-in .shield { margin: 0 auto 14px; }
+.steps { margin-top: 30px; }
+.steps h3 { margin-top: 1px; font-size: 18px; line-height: 28px; letter-spacing: -.5px; }
+.steps p { margin-top: 8px; font-size: 16px; line-height: 28px; letter-spacing: -.5px; }
+@media (min-width: 720px) {
+  /* 가로 세 칸: 번호·잇는 선 줄 아래로 글(지금은 잇는 선이 단계 제목 한가운데를 그어 지나감 — 삼쩜삼 가로 연혁처럼 점·선 아래 글) · 번호→제목 14 */
+  .steps li { padding: 44px 0 0; }
+  .steps h3 { margin-top: 0; }
+}
+@media (min-width: 960px) {
+  .tp-in { padding: 100px 56px; }
+  .tp-in .shield { margin-bottom: 20px; }
+  .steps { margin-top: 50px; }
+  .steps h3 { margin-top: 0; font-size: 20px; line-height: 30px; }
+  .steps p { line-height: 26px; }
+}
+
+/* 10. 기장 상담 — 머리 가운데 · 카톡 판은 959px 이하 가운데(제목·설명·버튼 한 줄기) / 960px 이상 두 칸이라 왼쪽
+   아이콘→제목 14/20 · 판 제목 24/700/34(PC 32/700/42) · 설명 16/400/28(PC 26) · 설명→버튼 44/30 · 버튼→각주 10/20 · 판 사이 16/30 */
+.talk { gap: 16px; }
+.talk-kk .ic3d { margin-bottom: 14px; }
+.talk-kk h3 { font-size: 24px; line-height: 34px; letter-spacing: -.5px; }
+.talk-kk p { font-size: 16px; line-height: 28px; letter-spacing: -.5px; }
+.talk-kk .nudge { font-weight: 400; }
+.talk-kk .btn { margin-top: 44px; }
+.talk-kk .fine { margin-top: 10px; }
+.talk-kk .tel { font-weight: 700; letter-spacing: -.5px; }
+@media (max-width: 959px) {
+  .talk-kk { align-items: center; text-align: center; }
+}
+@media (min-width: 960px) {
+  .talk { gap: 30px; }
+  .talk-kk .ic3d { margin-bottom: 20px; }
+  .talk-kk h3 { font-size: 32px; line-height: 42px; }
+  .talk-kk p { line-height: 26px; }
+  .talk-kk .btn { margin-top: 30px; }
+  .talk-kk .fine { margin-top: 20px; }
+}
+
+/* 11. 자주 묻는 질문 — 옆 제목 719px 이하 가운데 / 720px 이상 두 칸이라 왼쪽 · 질문 목록은 늘 왼쪽
+   질문 18/700/28(PC 20/700/30) · 줄 위아래 20 · 열면 질문→답 8 · 답 16/400/28(PC 26) */
+.faq-side { margin-bottom: 30px; }
+.faq-side .lede { margin: 16px auto 0; }
+.faq-side .btn { margin-top: 44px; }
+.faq summary { padding: 20px 4px; font-size: 18px; line-height: 28px; font-weight: 700; letter-spacing: -.5px; }
+.faq details[open] summary { padding-bottom: 8px; }
+.faq .a { padding: 0 4px 20px; font-size: 16px; line-height: 28px; letter-spacing: -.5px; }
+@media (max-width: 719px) {
+  .faq-side { text-align: center; }
+}
+@media (min-width: 720px) {
+  .faq-side .lede { margin-left: 0; margin-right: 0; }
+}
+@media (min-width: 960px) {
+  .faq-side .lede, .faq-side .btn { margin-top: 30px; }
+  .faq summary { font-size: 20px; line-height: 30px; }
+  .faq .a { line-height: 26px; }
+}
+
+/* 12. 마무리 — 가운데(네이버 웍스 '시작하기' 띠) · 위아래 100/140 · 제목 26/700/38 · PC 44/700/62 · 제목→버튼 48/40 · 버튼 사이 10/12 */
+.closing { text-align: center; padding-block: 100px; }
+.closing .big { line-height: 38px; }
+.closing .cta { margin-top: 48px; }
+@media (min-width: 960px) {
+  .closing { padding-block: 140px; }
+  .closing .big { font-size: 44px; line-height: 62px; }
+  .closing .cta { margin-top: 40px; gap: 12px; }
+}
+
+/* 13. 지금 index.html 에 없는 옛 이름(.incl-box·.cc-how·.stats) — 다시 쓰이면 같은 규칙 */
+.incl-box li, .ib-in li, .cc-how li { font-size: 16px; line-height: 28px; font-weight: 400; letter-spacing: -.5px; }
+.cc-how b { font-weight: 700; }
+.stats, .stats-note { margin-left: auto; margin-right: auto; }
+.stats-note { text-align: center; }
+.stat b { font-weight: 700; letter-spacing: -.5px; }
