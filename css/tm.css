@@ -607,7 +607,6 @@ dialog.sheet::backdrop { background: rgba(11, 21, 48, .55); }
 .ch-note .ch-tel { display: inline-block; padding: 12px 6px; margin: -12px -6px; }
 .hero-proof { display: none; }
 /* AI 표기: 영상과 같은 화면에(규정) */
-.ai-tag { position: absolute; left: 12px; top: 12px; z-index: 2; padding: 3px 8px; border-radius: 7px; background: rgba(11, 21, 48, .6); color: #fff; font-size: 12px; font-weight: 700; line-height: 1.5; letter-spacing: -.01em; pointer-events: none; }
 /* 시연 휴대폰을 누르면 카톡·계산(장면 1·2) */
 .show-frame[data-cur="0"] .device, .show-frame[data-cur="1"] .device { cursor: pointer; }
 /* 장면 1(카톡): 말풍선 아래 입력줄로 끝맺음 */
@@ -638,7 +637,7 @@ dialog.sheet::backdrop { background: rgba(11, 21, 48, .55); }
 .ex-label, .stat small, .marq-note, .stats-note { text-wrap: balance; }
 /* 믿음 띠: 누적 고객을 큰 제목으로 */
 .strip { padding: 44px 0 8px; }
-.strip-t { display: block; text-align: center; margin-bottom: 20px; }
+.strip-t { display: block; text-align: center; margin: 0 auto 20px; }   /* .wrap 가운데 맞춤을 덮어쓰지 않게 */
 .strip-t .big em { font-style: normal; color: var(--b); }
 .strip-t .big sup { font-size: 15px; color: var(--sub); font-weight: 600; }
 .strip-t p { margin: 8px 0 0; font-size: 15px; color: var(--sub); }
