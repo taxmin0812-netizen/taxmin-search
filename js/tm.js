@@ -65,21 +65,23 @@
   })();
 
   /* ── 전환 신호: dataLayer · gtag · 구글 광고/네이버(tags.js) · 사무소 시트 집계 */
-  function hit(e) {
+  function hit(e, anon) {
     if (!ENDPOINT || C.hitBeacon === false) return;
-    var body = JSON.stringify({ type: 'hit', e: e, s: SRC.key, v: SRC.ad || '-', page: PAGE });
+    /* anon: [선택] 동의 없이 보낸 전화 예약 — 예약 줄과 시각으로 짝지어지지 않게 경로·광고 번호 없이 횟수만 */
+    var body = JSON.stringify({ type: 'hit', e: e, s: anon ? '-' : SRC.key, v: anon ? '-' : (SRC.ad || '-'), page: PAGE });
     try {
       if (navigator.sendBeacon) navigator.sendBeacon(ENDPOINT, new Blob([body], { type: 'text/plain;charset=utf-8' }));
       else fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', body: body, headers: { 'Content-Type': 'text/plain;charset=utf-8' }, keepalive: true });
     } catch (x) {}
   }
   function track(name, p) {
-    p = p || {}; p.page = PAGE; p.traffic_src = SRC.key; p.ad = SRC.ad || '-';
+    p = p || {}; var anon = !!p.anon; delete p.anon;
+    p.page = PAGE; p.traffic_src = anon ? '-' : SRC.key; p.ad = anon ? '-' : (SRC.ad || '-');
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push(Object.assign({ event: name }, p));
     try { if (typeof window.gtag === 'function') window.gtag('event', name, Object.assign({ transport_type: 'beacon' }, p)); } catch (x) {}
     try { if (typeof window.TM_CONV === 'function') window.TM_CONV(name, p); } catch (x) {}
-    if (/^(kakao_click|tel_click|form_submit|calc_complete)$/.test(name)) hit(name);
+    if (/^(kakao_click|tel_click|form_submit|calc_complete)$/.test(name)) hit(name, anon);
   }
   if (!bot && !sget('tm_view_' + PAGE)) { sset('tm_view_' + PAGE, '1'); hit('view'); }
 
@@ -323,7 +325,7 @@
       var R = compute();
       var hint = !S.ind ? '업종부터 골라 주세요.' : R.corp ? '' : !S.rev ? '작년 매출을 고르면 더 정확해져요.' : !S.emp ? '직원 수를 고르면 확정돼요.' : '';
       var g0 = IND_G[S.ind], bb0 = BAND[g0];
-      var base = !S.ind ? '' : R.corp ? '법인 · 장부 상태와 거래량을 보고 확정' : R.ind + ' · 작년 매출 ' + R.rev + ' · 4대보험 직원 ' + R.emp;
+      var base = !S.ind ? '' : R.corp ? '법인' : R.ind + ' · 작년 매출 ' + R.rev + ' · 4대보험 직원 ' + R.emp;
       var chg = (S.ind && !R.corp && S.rev === 'lo' && S.emp === '3' && bb0) ? '작년 매출이 ' + bb0.lo + '을 넘거나 직원이 4명 이상이면 달라져요' : '';
       cres.innerHTML = '<p class="lbl">예상 기장료' + (R.tier ? ' · ' + esc(R.tier) : '') + '</p>' +
         '<p class="price num">' + esc(R.price) + '<small>부가세 별도</small></p>' +
@@ -331,16 +333,18 @@
         (R.why ? '<p class="why">' + esc(R.why) + '</p>' : '') +
         (hint ? '<p class="incl">' + hint + '</p>' : '') +
         (S.ind ? '<dl class="cd-dl"><div><dt>기준</dt><dd>' + esc(base) + '</dd></div>' +
-          '<div><dt>포함</dt><dd>장부 정리 · 부가세 신고 · 직원 월급 신고 · 매달 매출 보고서</dd></div>' +
-          '<div><dt>별도</dt><dd>' + (R.corp ? '법인세' : '종합소득세') + ' 신고비(1년 1번 · 신고 전에 금액 안내)</dd></div>' +
+          '<div><dt>포함</dt><dd>장부 정리 · 부가세 신고 · 직원 월급 신고 · <span class="nw">매달 매출 보고서</span></dd></div>' +
+          '<div><dt>별도</dt><dd>' + (R.corp ? '법인세' : '종합소득세') + ' 신고비(1년 1번 · 신고 전에 <span class="nw">금액 안내</span>)</dd></div>' +
           (chg ? '<div><dt>달라지면</dt><dd>' + esc(chg) + '</dd></div>' : '') + '</dl>' : '');
       cres.classList.toggle('done', R.done);
       if (!still) { cres.classList.remove('pop'); void cres.offsetWidth; cres.classList.add('pop'); }
       /* 카톡에 붙여 넣는 글: 검색어는 넣지 않고 짧은 안내 번호만(N 네이버 광고 · G 구글 광고 · W 그 밖 - 쪽 이름) */
       LAST = S.ind ? {
         R: R,
-        text: '[택스민 기장료 상담]\n업종: ' + R.ind + '\n작년 매출: ' + R.rev + '\n4대보험 직원: ' + R.emp +
-          '\n예상 기장료: ' + R.price + ' (부가세 별도' + (R.tier ? ', ' + R.tier : '') + ')\n(안내 번호 ' + ({ naver_ad: 'N', google_ad: 'G' }[SRC.key] || 'W') + '-' + PAGE.replace(/^[a-z]+-/, '') + ')'
+        /* 값 없는 줄('-')은 빼고, 법인은 '법인'을 두 번 쓰지 않음 */
+        text: ['[택스민 기장료 상담]', '업종: ' + R.ind, R.rev !== '-' ? '작년 매출: ' + R.rev : '', R.emp !== '-' ? '4대보험 직원: ' + R.emp : '',
+          '예상 기장료: ' + R.price + ' (부가세 별도' + (R.tier && !R.corp ? ', ' + R.tier : '') + ')',
+          '(안내 번호 ' + ({ naver_ad: 'N', google_ad: 'G' }[SRC.key] || 'W') + '-' + PAGE.replace(/^[a-z]+-/, '') + ')'].filter(Boolean).join('\n')
       } : null;
       /* 전화 상담 폼의 업종: 손님이 직접 고르지 않았으면 계산 결과를 따라감 */
       var f = $('[data-rsv]');
@@ -360,6 +364,7 @@
       S[k] = v;
       $$('button', btn.parentNode).forEach(function (x) { x.setAttribute('aria-pressed', x === btn ? 'true' : 'false'); });
       if (k === 'ind') {
+        cdlg.classList.toggle('corp', IND_G[v] === 'X');   /* 법인: STEP 2·3 은 숨김(상담 때 확정) */
         if (IND_G[v] === 'X') { ['rev', 'emp'].forEach(function (q) { S[q] = null; $$('button', grp(q)).forEach(function (x) { x.disabled = true; x.setAttribute('aria-pressed', 'false'); }); }); }
         else {
           revLabels(IND_G[v]); $$('button', grp('emp')).forEach(function (x) { x.disabled = false; });
@@ -496,16 +501,6 @@
     var s = $('[data-dock-t]', a); if (s) s.textContent = '전화 예약';
   })();
 
-  /* ── 아래 떠 있는 '택스민 기장 문의'(웍스 '도입 문의' 꼴): 누르면 카톡 상담·예약 상담·전화 상담 */
-  var askBtn = $('[data-ask-btn]'), askMenu = $('#ask-menu');
-  if (askBtn && askMenu) {
-    var askSet = function (on) { askMenu.hidden = !on; askBtn.setAttribute('aria-expanded', on ? 'true' : 'false'); };
-    askBtn.addEventListener('click', function (ev) { ev.stopPropagation(); var on = askMenu.hidden; askSet(on); if (on) track('ask_open', {}); });
-    doc.addEventListener('click', function (ev) { if (!askMenu.hidden && !ev.target.closest('[data-ask]')) askSet(false); });
-    doc.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !askMenu.hidden) { askSet(false); askBtn.focus(); } });
-    askMenu.addEventListener('click', function () { setTimeout(function () { askSet(false); }, 0); });
-  }
-
   /* ── 전화 예약: '#rsv' 로 가는 버튼(첫 화면 시간 밖·고정 바·계산 팝업·PC 안내 창·마무리 띠)을 누르면 예약 팝업 */
   if (rsvDlg) {
     doc.addEventListener('click', function (ev) {
@@ -515,7 +510,7 @@
       var inD = a.closest('dialog'); if (inD && inD !== rsvDlg) closeDlg(inD);
       openDlg(rsvDlg); dockSync();
       track('rsv_open', { position: a.getAttribute('data-track') || '' });
-      var t = $('#r-tel', rsvDlg); if (t && isPC()) { try { t.focus({ preventScroll: true }); } catch (x) {} }
+      var lf = $('[data-rsv]', rsvDlg); if (lf) lf.dispatchEvent(new CustomEvent('ld-open'));   /* 기장료 계산을 마쳤으면 번호 단계부터 */
     });
     rsvDlg.addEventListener('close', dockSync);
   }
@@ -525,10 +520,12 @@
   if (form) {
     var tI = $('#r-tel', form), oI = $('#r-ok', form), oI2 = $('#r-ok2', form);
     var out = $('.msg', form), sb = $('button[type=submit]', form);
-    /* 단계별 간단 신청: 업종 카드 → 작년 매출 카드 → 번호·동의. 카드를 누르면 바로 다음 단계 · 진행 막대가 참 · > 는 동의 내용 펼치기 */
-    var steps = $$('.ld-step', form), stepNo = 1, dlgEl = form.closest('dialog') || doc;
-    var bar = $('[data-ld-bar]', dlgEl), tip = $('[data-ld-tip]', dlgEl), pick = $('[data-ld-pick]', form), more = $('[data-ld-more]', form), terms = $('#ld-terms', form);
+    /* 단계별 간단 신청: 업종 카드 → 작년 매출 카드 → 번호·동의. 카드를 누르면(Space·Enter 포함) 바로 다음 단계 —
+       화살표로 훑을 때는 넘기지 않음(키보드로도 셋째 칸부터 고를 수 있게) · '보기'는 동의 내용 펼치기 */
+    var steps = $$('.ld-step', form), stepNo = 1, dlgEl = form.closest('dialog') || doc, lastKey = '';
+    var bar = $('[data-ld-bar]', dlgEl), tip = $('[data-ld-tip]', dlgEl), pick = $('[data-ld-pick]', form);
     var val = function (n) { return (form.querySelector('input[name=' + n + ']:checked') || {}).value || ''; };
+    var calcFor = function () { return LAST && LAST.R.done && LAST.R.ind === val('ind') ? LAST.R : null; };   /* 고른 업종과 같은 계산 결과만 */
     var ldSync = function () {
       var d = tI.value.replace(/\D/g, ''), okT = /^(010\d{8}|01[16789]\d{7,8})$/.test(d), okC = oI.checked;
       var pct = stepNo === 1 ? 22 : stepNo === 2 ? 50 : okT && okC ? 100 : okT || okC ? 88 : 76;
@@ -536,22 +533,43 @@
       if (tip) { tip.style.left = 'min(calc(' + pct + '% - 8px), calc(100% - 66px))'; tip.innerHTML = stepNo === 3 ? '거의 <b>다 됐어요!</b>' : '신청까지 <b>10초!</b>'; }
       sb.classList.toggle('on', okT && okC);
     };
-    var goStep = function (n) {
+    var goStep = function (n, user) {
       stepNo = Math.max(1, Math.min(3, n));
       steps.forEach(function (st) { st.classList.toggle('on', +st.getAttribute('data-step') === stepNo); });
-      if (pick && stepNo === 3) pick.textContent = [val('ind'), val('rev') ? '작년 매출 ' + val('rev') : ''].filter(Boolean).join(' · ');
+      if (pick && stepNo === 3) {
+        var rv = val('rev'), cr = calcFor();
+        pick.textContent = [val('ind'), rv === '올해 시작' ? '올해 시작' : rv ? '작년 매출 ' + rv : cr && cr.rev !== '-' ? '작년 매출 ' + cr.rev : ''].filter(Boolean).join(' · ');
+      }
       ldSync();
-      if (stepNo === 3 && isPC()) { try { tI.focus({ preventScroll: true }); } catch (x) {} }
+      /* 초점: PC 번호 단계는 번호 칸, 그 밖에는 새 단계 질문(앞 단계 카드가 숨으며 초점이 사라지지 않게) */
+      if (user) { var to = stepNo === 3 && isPC() ? tI : $('.ld-step.on .ld-q', form); if (to) { try { to.focus({ preventScroll: true }); } catch (x) {} } }
     };
-    form.addEventListener('click', function (e) {
-      var r = e.target.closest('input[type=radio]'); if (!r) return;
+    var pend = false;   /* 한 번 고르면 한 번만 넘김(누르기·Space·Enter 가 겹쳐도) */
+    var advance = function (r) {
+      if (pend) return; pend = true;
       var st = +r.closest('.ld-step').getAttribute('data-step');
       track('rsv_step', { step: st, value: r.value });
-      setTimeout(function () { goStep(st + 1); }, 160);
+      setTimeout(function () { pend = false; goStep(st + 1, true); }, 160);
+    };
+    form.addEventListener('keydown', function (e) {
+      var r = e.target; if (!r.matches || !r.matches('input[type=radio]')) return;
+      lastKey = e.key;
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (!r.checked) { r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); } advance(r); }
     });
-    $$('[data-ld-back]', form).forEach(function (b) { b.addEventListener('click', function () { goStep(stepNo - 1); }); });
+    form.addEventListener('click', function (e) {
+      var r = e.target.closest('input[type=radio]'); if (!r) return;
+      var arrow = e.detail === 0 && /^Arrow/.test(lastKey); lastKey = '';
+      if (arrow) return;   /* 화살표로 훑기만 한 것 — Space·Enter·누르기만 넘김 */
+      advance(r);
+    });
+    $$('[data-ld-back]', form).forEach(function (b) { b.addEventListener('click', function () { goStep(stepNo - 1, true); }); });
     tI.addEventListener('input', ldSync); oI.addEventListener('change', ldSync); goStep(1);
-    if (more && terms) more.addEventListener('click', function () { var on = terms.hidden; terms.hidden = !on; more.setAttribute('aria-expanded', on ? 'true' : 'false'); });
+    /* 기장료 계산을 마친 손님이 예약 창을 열면 업종·매출은 계산 결과대로 두고 번호 단계부터('이전'으로 바꿀 수 있음) */
+    form.addEventListener('ld-open', function () { if (stepNo === 1 && !val('rev') && calcFor()) goStep(3, true); });
+    $$('[data-ld-more]', form).forEach(function (b) {
+      var box = $('#' + b.getAttribute('aria-controls'), form), t = $('[data-t]', b);
+      if (box) b.addEventListener('click', function () { var on = box.hidden; box.hidden = !on; b.setAttribute('aria-expanded', on ? 'true' : 'false'); if (t) t.textContent = on ? '접기' : '보기'; });
+    });
     tI.addEventListener('input', function () {
       var d = tI.value.replace(/\D/g, '');
       if (/^8210/.test(d)) d = '0' + d.slice(2);
@@ -567,18 +585,17 @@
       var tel = tI.value.trim(), digits = tel.replace(/\D/g, '');
       if (/^8210/.test(digits)) digits = '0' + digits.slice(2);
       /* 010 은 11자리만, 옛 011·016~019 는 10~11자리 */
-      if (!/^(010\d{8}|01[16789]\d{7,8})$/.test(digits)) { tI.parentNode.classList.add('bad'); tI.setAttribute('aria-invalid', 'true'); tI.setAttribute('aria-describedby', 'r-msg'); out.textContent = '휴대폰 번호를 확인해 주세요. 예) 010-1234-5678'; tI.focus(); return; }
+      if (!/^(010\d{8}|01[16789]\d{7,8})$/.test(digits)) { tI.parentNode.classList.add('bad'); tI.setAttribute('aria-invalid', 'true'); tI.setAttribute('aria-describedby', 'r-msg'); out.innerHTML = '휴대폰 번호를 확인해 주세요. 예) <span class="nw">010-1234-5678</span>'; tI.focus(); return; }
       if (!oI.checked) { out.textContent = '개인정보 수집·이용에 동의해 주세요.'; oI.focus(); return; }
       if (!ENDPOINT) { out.textContent = '지금은 온라인 예약을 받을 수 없어요. 전화(' + TEL + ')나 카톡으로 연락 주세요.'; return; }
-      var when = (form.querySelector('input[name=when]:checked') || {}).value || '언제든';
-      var ind = (form.querySelector('input[name=ind]:checked') || {}).value || '';
-      var rv = (form.querySelector('input[name=rev]:checked') || {}).value || '';   /* 호칭 칸 대신 작년 매출(선택) — 시트 칸 이름은 그대로 */
+      var ind = val('ind'), rv = val('rev');   /* 호칭 칸 대신 작년 매출 — 시트 칸 이름은 그대로 */
       var R = LAST ? LAST.R : null, adOk = !!(oI2 && oI2.checked);   /* 들어온 곳·광고·캠페인은 [선택] 동의가 있을 때만 */
+      var mark = R && rv ? ' (계산기 기준)' : '';   /* 폼에서 매출을 따로 고르면 계산 결과와 다를 수 있음 */
       var data = {
-        type: 'lead', '요청': '전화 상담 예약', '이름': '(호칭 없음)', '연락처': tel, '통화 편한 시간': when,
-        '업종': ind || (R ? R.ind : '-'), '남기실 말씀': R ? '계산기: ' + R.ind + ' · ' + R.rev + ' · 직원 ' + R.emp : '',
-        '작년 매출': rv || (R ? R.rev : '-'), '직원(4대보험)': R ? R.emp : '-', '추천 요금제': R ? R.tier : '-',
-        '예상 기장료': R ? R.price + ' (부가세 별도)' : '-',
+        type: 'lead', '요청': '전화 상담 예약', '이름': '(호칭 없음)', '연락처': tel, '통화 편한 시간': '언제든',
+        '업종': ind || (R ? R.ind : '-'), '남기실 말씀': R ? '계산기 결과(참고): ' + R.ind + ' · ' + R.rev + ' · 직원 ' + R.emp : '',
+        '작년 매출': rv || (R ? R.rev : '-'), '직원(4대보험)': R ? R.emp : '-', '추천 요금제': R ? R.tier + mark : '-',
+        '예상 기장료': R ? R.price + ' (부가세 별도)' + mark : '-',
         '들어온 곳': adOk ? SRC.full : '(광고 확인 동의 안 함)', '광고': adOk ? (SRC.ad || '-') : '-', '캠페인': adOk ? (SRC.camp || '-') : '-', '시안': PAGE,
         '개인정보 수집·이용 동의': '동의함', '_honey': (form.querySelector('[name=hp]') || {}).value || ''
       };
@@ -590,10 +607,11 @@
           t = String(t || '').trim();
           if (t === 'bad') return fail('휴대폰 번호를 다시 확인해 주세요.');
           if (t !== 'ok' && t !== 'dup' && t !== 'held') return fail();
-          track('form_submit', {});
-          var whenTxt = when === '언제든' ? '평일 10:00–17:30 중 편하실 때' : when + '에';
+          track('form_submit', adOk ? {} : { anon: 1 });
+          if (tip) tip.hidden = true;   /* 접수 뒤엔 '거의 다 됐어요!' 말풍선을 거둠 */
+          if (bar) bar.style.width = '100%';
           form.outerHTML = '<div class="consult done" role="status" tabindex="-1"><div class="ok">' + CK + '</div><h2>접수됐어요</h2>' +
-            '<p>' + esc(whenTxt) + ' ' + esc(tel) + '로 전화드릴게요</p>' +
+            '<p><span class="nw">평일 10:00–17:30</span> 사이에 <span class="nw">' + esc(tel) + '</span>로 전화드릴게요</p>' +
             '<a class="btn btn-primary btn-block" href="' + KAKAO + '" data-kakao="done" data-copy>' + KK + '카톡으로도 바로 묻기</a></div>';
           var dn = $('.consult.done'); if (dn) { try { dn.focus(); } catch (x) {} }   /* 초점이 사라지지 않게 접수 안내로 */
         })
