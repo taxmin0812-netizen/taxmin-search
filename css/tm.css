@@ -1973,3 +1973,14 @@ html.tm-off .ld-ic.tel { display: none; }
 .pst-s, .calc-fine { color: #6B7684; }
 .closing .fine { color: #fff; }
 .ind-card::after { inset: 36% 0 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, .78)); }
+
+/* ── 16차 = 기장 문의 단추 캐릭터(Gemini 로 만든 2D 사장님 — 알약 오른쪽 끝에서 위로 살짝 삐져나옴, 아래는 남색으로 스며듦) ───────── */
+.ask-btn { padding: 0 98px 0 22px; }
+.ask-ch { position: absolute; right: 10px; bottom: 0; width: 84px; height: auto; pointer-events: none; -webkit-mask-image: linear-gradient(#000 68%, transparent 100%); mask-image: linear-gradient(#000 68%, transparent 100%); }
+/* 알약 위로 나온 머리도 단추(그림은 pointer-events:none 이라 머리 모양 누름 영역을 따로 — 뒤 본문이 눌리지 않게) */
+.ask-btn::before { content: ""; position: absolute; right: 36px; bottom: 100%; width: 44px; height: 28px; border-radius: 22px 22px 0 0; }
+@media (min-width: 960px) {
+  .ask-btn { padding: 0 106px 0 24px; }
+  .ask-ch { width: 92px; }
+  .ask-btn::before { right: 38px; width: 48px; height: 32px; border-radius: 24px 24px 0 0; }
+}
