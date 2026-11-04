@@ -807,3 +807,12 @@ dialog.sheet::backdrop { background: rgba(11, 21, 48, .55); }
 @media (prefers-reduced-motion: reduce) {
   .js-rv .tpanel .steps li { opacity: 1 !important; transform: none !important; }
 }
+/* 상단 오른쪽: [기장료 계산][카톡 상담] 나란히(대표님 11/4) */
+.hd .hd-calc { margin-right: 6px; }
+.hd .hd-calc svg { width: 17px; height: 17px; }
+@media (max-width: 379px) {
+  .hd .bar { padding-right: 6px; padding-left: 10px; }
+  .hd .btn-sm { padding: 0 11px; font-size: 14px; }
+  .hd .hd-calc svg { display: none; }
+  .hd .hd-calc { margin-right: 4px; }
+}
