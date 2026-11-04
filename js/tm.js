@@ -1,18 +1,20 @@
 /* 택스민 랜딩 동작: 출처 기록 · 전환 신호 · 첫 화면 시연(영상 + 3장면 자동 넘김) · 계산기 · 흐름띠 · 숫자 세기 ·
    전화 상담(페이지 안 폼) · 카톡(PC 안내) · 아래 고정 버튼.
    요금 규칙은 택스민 요금 등급표(개인사업자, 직전 연도 매출 기준)와 같다:
-   기본 월 5만(직원 3명까지)·6만(4~5명) / 중간 월 7~8만 / 성실신고확인 월 12~15만 / 법인 월 10만부터 — 모두 부가세 별도, 6개월 약정.
+   기본 월 5만(직원 3명까지)·6만(4~5명) / 중간 월 7~8만 / 성실신고확인 월 12~15만 / 법인 월 10만부터 — 모두 부가세 별도.
    카톡은 쿼리 없는 채널 채팅 주소를 같은 탭에서 연다(앱 안 브라우저·구글 팝업 규정). PC 는 카카오 로그인이 필요해 안내 창을 먼저 보인다.
-   움직임 줄이기 설정·검색 로봇·화면 캡처에서는 영상·자동 넘김·흐름띠·숫자 세기를 모두 하지 않는다(처음부터 다 보임). */
+   움직임 줄이기 설정·검색 로봇·화면 캡처에서는 영상·자동 넘김·흐름띠·숫자 세기를 모두 하지 않는다(처음부터 다 보임).
+   js-rv(등장 준비)·tm-off(상담 시간 밖)는 첫 그림 전에 js/early.js 가 붙인다. */
 (function () {
   'use strict';
+  window.TM_ON = 1;
   var doc = document, root = doc.documentElement, C = window.TM || {};
   var KAKAO = C.kakao || 'https://pf.kakao.com/_Mxojqs/chat';
   var TEL = C.tel || '0507-1445-7729';
   var ENDPOINT = C.endpoint || '';
   var PAGE = (C.pagePrefix || 'srch-') + (doc.body.getAttribute('data-page') || 'main');
   var calm = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  var bot = /bot|crawl|spider|Yeti|AdsBot|Lighthouse|HeadlessChrome|PageSpeed/i.test(navigator.userAgent) || /[?&]norv\b/.test(location.search);
+  var bot = /bot|crawl|spider|Yeti|AdsBot|HeadlessChrome/i.test(navigator.userAgent) || /[?&]norv\b/.test(location.search);
   var still = calm || bot;
   var IO = 'IntersectionObserver' in window;
 
@@ -83,18 +85,22 @@
 
   /* ── 알림 띠 · 복사(성공했을 때만 '복사했어요') */
   var toastEl = $('.toast'), toastT;
+  function topHost() { return doc.querySelector('dialog[open]') || doc.body; }
   function toast(msg) {
     if (!toastEl) return;
+    var host = topHost();   /* 열린 팝업이 있으면 그 안으로 옮김(팝업 뒤·어두운 막 아래에 가리지 않게) — 계산 팝업은 아래 버튼 줄 바로 위에 */
+    var bar = host !== doc.body && host.querySelector('.cd-acts'); if (bar) host = bar;
+    if (toastEl.parentNode !== host) host.appendChild(toastEl);
     toastEl.textContent = msg; toastEl.classList.add('on');
     clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove('on'); }, 2800);
   }
   function copyText(t) {
     var ok = false;
     try {
-      var ta = doc.createElement('textarea');
+      var host = topHost(), ta = doc.createElement('textarea');   /* 팝업이 열려 있으면 바깥은 손댈 수 없으니 팝업 안에서 복사 */
       ta.value = t; ta.setAttribute('readonly', ''); ta.className = 'hp';
-      doc.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length);
-      ok = doc.execCommand('copy'); doc.body.removeChild(ta);
+      host.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length);
+      ok = doc.execCommand('copy'); host.removeChild(ta);
     } catch (x) { ok = false; }
     return ok;
   }
@@ -103,8 +109,7 @@
   var hd = $('[data-hd]');
   function onScroll() { if (hd) hd.classList.toggle('on', window.scrollY > 40); }
   window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
-  if (!still && IO) {
-    root.classList.add('js-rv');
+  if (!still && IO && root.classList.contains('js-rv')) {
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
     }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
@@ -113,25 +118,32 @@
 
   /* ── 첫 화면 시연 */
   var show = $('[data-show]');
+  var paused = false, mqSet = null;   /* 멈춤 단추 상태 — 흐름띠도 함께 멈춤(WCAG 2.2.2) */
   if (show) {
-    var frame = $('.show-frame', show), video = $('.show-bg', show);
+    var frame = $('.show-frame', show), video = $('.show-bg', show), dev = $('.device', show);
     var scenes = $$('.scene', show), tabs = $$('[data-go]', show), caps = $$('[data-cap]', show);
-    var cur = 0, timer = null, t0 = 0, raf = 0, seen = false, held = false, DUR = 7000, chatT = [];
-    /* 배경 영상: 사진을 먼저 보이고, 영상은 페이지가 다 뜬 뒤 받아서 재생되면 겹친다(데이터 절약 모드·움직임 줄이기는 사진만) */
-    var save = navigator.connection && navigator.connection.saveData;
+    var cur = 0, t0 = 0, raf = 0, seen = false, held = false, DUR = 9000, chatT = [], cs = 0;
+    /* 배경 영상: 사진을 먼저 보이고, 영상은 페이지가 다 뜬 뒤 받아서 재생되면 겹친다(데이터 절약 모드·아주 느린 회선·움직임 줄이기는 사진만) */
+    var cn = navigator.connection, save = !!(cn && (cn.saveData || /2g|3g/.test(cn.effectiveType || '')));
+    var playV = function () { if (!video || !video.src || paused) return; var p = video.play(); if (p && p.catch) p.catch(function () {}); };
     if (video && !still && !save) {
       var startVideo = function () {
         if (video.src) return;
         video.src = video.getAttribute('data-src');
-        video.addEventListener('playing', function () { video.classList.add('on'); }, { once: true });
-        var p = video.play(); if (p && p.catch) p.catch(function () {});
+        video.addEventListener('playing', function () {
+          video.classList.add('on');
+          /* 영상이 늦게 시작되면(휴대폰) 대화가 이미 흐른 만큼 영상을 앞으로 맞춤 — 사장님 동작과 말풍선이 어긋나지 않게 */
+          if (cur === 0 && cs) { var el = (performance.now() - cs) / 1000; if (el > 0.3 && el < 8) { try { video.currentTime = el; } catch (x) {} } }
+        }, { once: true });
+        playV();
       };
       if (doc.readyState === 'complete') setTimeout(startVideo, 300); else window.addEventListener('load', function () { setTimeout(startVideo, 300); });
-      onView(frame, function (v) { if (!video.src) return; if (v) { var p = video.play(); if (p && p.catch) p.catch(function () {}); } else video.pause(); });
+      onView(frame, function (v) { if (!video.src) return; if (v) playV(); else video.pause(); });
     }
     var chatPlay = function (sc) {
-      chatT.forEach(clearTimeout); chatT = [];
-      var bubs = $$('.bub', sc), typ = $('.typing', sc), t = 200;
+      chatT.forEach(clearTimeout); chatT = []; cs = performance.now();
+      /* 배경 영상의 사장님 동작에 맞춤: 0~1.5초 입력하고 보냄 → 내 말풍선, 고개 들고 미소 → 세무사 답 */
+      var bubs = $$('.bub', sc), typ = $('.typing', sc), t = 1300;
       bubs.forEach(function (b) { b.classList.remove('in'); });
       if (typ) typ.classList.remove('on');
       bubs.forEach(function (b) {
@@ -141,178 +153,164 @@
         t += us ? 700 : 650;
       });
     };
+    /* 키보드 초점이 시연 안에 있으면 자동 넘김을 멈춘다(마우스로 누른 초점은 빼고) */
+    var kbIn = function () { var a = doc.activeElement; try { return !!(a && show.contains(a) && a.matches(':focus-visible')); } catch (x) { return false; } };
+    var scr = $('.screen', show);
     var go = function (i, user) {
+      var prev = cur, back = i < cur && !(cur === scenes.length - 1 && i === scenes.length);
       cur = (i + scenes.length) % scenes.length;
+      if (scr) scr.classList.toggle('back', !!back);
+      if (frame) frame.setAttribute('data-cur', String(cur));
       scenes.forEach(function (s, k) {
-        s.classList.remove('on');
-        if (k === cur) { void s.offsetWidth; s.classList.add('on'); }
+        s.classList.remove('out');
+        if (k === prev && prev !== cur) { s.classList.remove('on'); s.classList.add('out'); }
+        else if (k !== cur) s.classList.remove('on');
+        if (k === cur) { s.classList.remove('on'); void s.offsetWidth; s.classList.add('on'); }
       });
-      tabs.forEach(function (b, k) { b.setAttribute('aria-selected', k === cur ? 'true' : 'false'); b.style.removeProperty('--p'); });
+      tabs.forEach(function (b, k) { b.setAttribute('aria-pressed', k === cur ? 'true' : 'false'); b.style.removeProperty('--p'); });
       caps.forEach(function (c, k) { c.hidden = k !== cur; });
-      if (!still && $('.bub', scenes[cur])) chatPlay(scenes[cur]);
+      if (!still && $('.bub', scenes[cur])) { chatPlay(scenes[cur]); if (video && video.src) { try { video.currentTime = 0; } catch (x) {} } }
       t0 = performance.now();
-      if (user) held = false;
+      if (user) held = paused || kbIn();   /* 멈춘 채 탭·밀기를 해도 멈춤은 그대로 */
     };
     var tick = function (now) {
       raf = 0;
-      if (!seen || held || still) return;
+      if (!seen || held || paused || still) return;
       var p = Math.min(1, (now - t0) / DUR);
       if (tabs[cur]) tabs[cur].style.setProperty('--p', p.toFixed(3));
       if (p >= 1) go(cur + 1);
       raf = requestAnimationFrame(tick);
     };
-    var run = function () { if (!raf && !still) raf = requestAnimationFrame(tick); };
+    var run = function () { if (!raf && !still && !paused) raf = requestAnimationFrame(tick); };
+    if (frame) frame.setAttribute('data-cur', '0');
     tabs.forEach(function (b, k) { b.addEventListener('click', function () { go(k, true); track('show_tab', { tab: k }); }); });
-    var pv = $('[data-prev]', show), nx = $('[data-next]', show);
-    if (pv) pv.addEventListener('click', function () { go(cur - 1, true); });
-    if (nx) nx.addEventListener('click', function () { go(cur + 1, true); });
+    /* 멈춤 단추(자동 넘김·배경 영상·흐름띠 멈춤, WCAG 2.2.2) — 이름은 그대로 두고 눌림 상태(aria-pressed)만 바꾼다 */
+    var pz = $('[data-pause]', show);
+    if (pz) pz.addEventListener('click', function () {
+      paused = !paused; held = paused; pz.setAttribute('aria-pressed', paused ? 'true' : 'false');
+      if (video && video.src) { if (paused) video.pause(); else playV(); }
+      if (mqSet) mqSet();
+      if (!paused) { t0 = performance.now(); run(); }
+    });
+    /* 시연 휴대폰을 톡 누르면: 카톡 장면일 때 카톡 상담 */
+    if (dev) dev.addEventListener('click', function () {
+      if (cur === 0) { var k = $('.hero [data-kakao="hero"]'); if (k) k.click(); }
+    });
+    /* 손가락으로 밀어 넘기기(화살표 대신) */
+    var tx = null, ty = null;
+    frame.addEventListener('touchstart', function (ev) { var t = ev.touches[0]; tx = t.clientX; ty = t.clientY; }, { passive: true });
+    frame.addEventListener('touchend', function (ev) {
+      if (tx === null) return;
+      var t = ev.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty; tx = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { go(cur + (dx < 0 ? 1 : -1), true); track('show_swipe', {}); }
+    }, { passive: true });
     if (!still) {
       frame.classList.add('play');
       show.addEventListener('mouseenter', function () { held = true; });
-      show.addEventListener('mouseleave', function () { held = false; t0 = performance.now(); run(); });
-      onView(show, function (v) { seen = v; if (v) { if (!t0) go(0); else t0 = performance.now(); run(); } }, { threshold: 0.35 });
+      show.addEventListener('mouseleave', function () { if (paused || kbIn()) return; held = false; t0 = performance.now(); run(); });
+      show.addEventListener('focusin', function () { if (kbIn()) held = true; });
+      show.addEventListener('focusout', function (ev) { if (paused || show.contains(ev.relatedTarget)) return; held = false; t0 = performance.now(); run(); });
+      onView(show, function (v) { seen = v; if (v) { if (!t0) go(0); else t0 = performance.now(); if (!paused) run(); } }, { threshold: 0.35 });
     }
   }
 
-  /* ── 계산기 */
+  /* ── 기장료 계산 팝업: 업종 5 · 작년 매출 3 · 직원 3 — 누를 때마다 바로 계산(11/4 대표님: 한눈에, 선택지 적게)
+     요금 규칙: 업종군 A 도소매(9억/15억) · B 음식·제조·건설·IT(5억/7.5억) · C 서비스·프리랜서(3억/5억) · X 법인 */
   var KK = '<span class="kk"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6c-5 0-9 3.1-9 7 0 2.5 1.7 4.7 4.2 5.9l-.9 3.5c-.1.4.4.7.7.4l4.2-2.8h.8c5 0 9-3.1 9-7s-4-7-9-7z" fill="currentColor"/></svg></span>';
   var CK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.3 4.3L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  /* 업종군: A 도소매 · B 음식·제조·건설·운수·IT · C 서비스·교육·임대·전문직·그 밖 · X 법인 / 마지막 칸 = 3D 그림(Higgsfield) */
-  var IND = [['food', 'B', '음식점 · 카페 · 숙박', 'coffee'], ['retail', 'A', '도소매 · 온라인 판매', 'box'], ['personal', 'C', '미용 · 네일 · 세탁', 'scissors'],
-    ['free', 'C', '프리랜서 · 크리에이터', 'play'], ['edu', 'C', '학원 · 교습소', 'book'], ['biz', 'C', '디자인 · 광고 · 컨설팅', 'laptop'],
-    ['mfg', 'B', '제조 · 건설 · 운수', 'roller'], ['it', 'B', 'IT · 소프트웨어', 'laptop'], ['rent', 'C', '부동산 임대', 'house'], ['pro', 'P', '전문직(의료·법률 등)', 'building'],
-    ['etc', '?', '그 밖의 업종', 'shop'], ['corp', 'X', '법인사업자예요', 'building']];
-  var TO_CONSULT = { food: '카페·음식점', retail: '도소매·온라인 판매', free: '크리에이터·프리랜서', corp: '법인' };
-  var EMP = [['0', '없어요'], ['3', '1~3명'], ['5', '4~5명'], ['10', '6명 이상']];
-  var BAND = {
-    A: { lo: '9억원', hi: '15억원', loM: '7,500만원', hiM: '1억 2,500만원' },
-    B: { lo: '5억원', hi: '7억 5천만원', loM: '약 4,200만원', hiM: '약 6,300만원' },
-    C: { lo: '3억원', hi: '5억원', loM: '2,500만원', hiM: '약 4,200만원' }
-  };
-  var RES0 = '<p class="lbl">예상 기장료</p><p class="price num">월 5만원부터<small>부가세 별도</small></p><p class="incl">작년 매출을 고르면 바로 계산돼요.</p>';
-  function band(g) { return BAND[g === 'A' || g === 'B' ? g : 'C']; }
-
-  var box = $('[data-calc]'), qBox = $('[data-calc-q]'), resBox = $('[data-calc-res]');
-  var LAST = null, calcSent = false;
-  if (box && qBox && resBox) {
-    var IMG = box.getAttribute('data-img') || 'img/3d/';
-    var A = { ind: null, rev: null, emp: null }, started = false;
-    var chipsHtml = function (name, list, col) {
-      return '<div class="chips' + (col ? ' col' : '') + '" data-name="' + name + '">' + list.map(function (x, i) {
-        var hide = name === 'ind' && i >= 6;
-        var pic = x[4] ? '<img src="' + IMG + x[4] + '.webp" alt="" width="30" height="30" loading="lazy">' : '';
-        return '<button type="button" class="chip" aria-pressed="false" data-v="' + x[0] + '"' + (x[3] ? ' data-g="' + x[3] + '"' : '') + (hide ? ' hidden' : '') + '>' + pic + '<span>' + x[1] + '</span></button>';
-      }).join('') + (name === 'ind' ? '<button type="button" class="chip more" data-more>다른 업종 보기</button>' : '') + '</div>';
-    };
-    qBox.innerHTML =
-      '<div class="q" data-q="ind"><h3 class="q-t"><i>1</i>어떤 일을 하세요?</h3><p class="q-h">가장 가까운 업종을 골라 주세요.</p>' +
-        chipsHtml('ind', IND.map(function (x) { return [x[0], x[2], 0, x[1], x[3]]; })) + '</div>' +
-      '<div class="q" data-q="rev" hidden><h3 class="q-t"><i>2</i>작년 매출은 어느 정도예요?</h3><p class="q-h">대략이면 괜찮아요. 홈택스 매출 조회에서도 볼 수 있어요.</p>' +
-        chipsHtml('rev', [['new', '올해 시작했어요<small>사업 준비 중 포함</small>'], ['lo', ''], ['mid', ''], ['hi', ''], ['unk', '잘 모르겠어요']], 1) + '</div>' +
-      '<div class="q" data-q="emp" hidden><h3 class="q-t"><i>3</i>4대보험 직원은 몇 명이에요?</h3><p class="q-h">사장님 본인은 빼고 세어 주세요.</p>' +
-        chipsHtml('emp', EMP, 0) + '</div>';
-    var qs = {}; $$('.q', qBox).forEach(function (el) { qs[el.getAttribute('data-q')] = el; });
-
-    var press = function (group, chip) { $$('.chip', group).forEach(function (c) { c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'); }); };
+  var IND_G = { food: 'B', retail: 'A', svc: 'C', mfg: 'B', corp: 'X' };
+  var IND_NAME = { food: '음식점·카페', retail: '도소매·쇼핑몰', svc: '서비스·프리랜서', mfg: '제조·건설·IT', corp: '법인' };
+  var EMP_NAME = { '3': '0~3명', '5': '4~5명', '6': '6명 이상' };
+  var BAND = { A: { lo: '9억원', hi: '15억원', loS: '9억', hiS: '15억' }, B: { lo: '5억원', hi: '7억 5천만원', loS: '5억', hiS: '7.5억' }, C: { lo: '3억원', hi: '5억원', loS: '3억', hiS: '5억' } };
+  var LAST = null, calcSent = false, calcStarted = false;
+  var cdlg = $('#calc-dlg');
+  function inclLine(R) {
+    if (R.won.length === 2) return '부가세 포함 월 ' + won(R.won[0] * 1.1) + ' ~ ' + won(R.won[1] * 1.1);
+    return '부가세 포함 월 ' + won(R.won[0] * 1.1) + (R.from ? '부터' : '');
+  }
+  if (cdlg) {
+    var S = { ind: null, rev: 'lo', emp: '3' };   /* 기본값: 업종 한 번이면 결과 완성 */
+    var cres = $('[data-cd-res]', cdlg);
+    var grp = function (k) { return $('[data-k="' + k + '"]', cdlg); };
+    var revText = function (g, v) { var bb = BAND[g]; return v === 'lo' ? bb.lo + ' 이하' : v === 'mid' ? bb.lo + ' 초과 ~ ' + bb.hi + ' 미만' : bb.hi + ' 이상'; };
     var revLabels = function (g) {
-      var b = band(g);
-      var L = { lo: b.lo + ' 이하<small>한 달 평균 ' + b.loM + ' 이하</small>',
-                mid: b.lo + ' 초과 ~ ' + b.hi + ' 미만<small>한 달 평균 ' + b.loM + ' ~ ' + b.hiM + '</small>',
-                hi: b.hi + ' 이상<small>한 달 평균 ' + b.hiM + ' 이상</small>' };
-      $$('.chip', qs.rev).forEach(function (c) { var v = c.getAttribute('data-v'); if (L[v]) $('span', c).innerHTML = L[v]; c.setAttribute('aria-pressed', 'false'); });
+      var bb = BAND[g];
+      $$('button', grp('rev')).forEach(function (x) {
+        var v = x.getAttribute('data-v');
+        x.textContent = v === 'lo' ? bb.loS + ' 이하' : v === 'mid' ? bb.loS + '~' + bb.hiS : bb.hiS + ' 이상';
+        x.disabled = false;
+      });
     };
-    var txt = function (chip) { if (!chip) return '-'; var s = $('span', chip) || chip; return (s.childNodes[0].textContent || s.textContent).trim(); };
-
     var compute = function () {
-      var g = A.ind.getAttribute('data-g');
-      var rv = A.rev ? A.rev.getAttribute('data-v') : '';
-      var emp = A.emp ? +A.emp.getAttribute('data-v') : 0;
-      var R = { key: A.ind.getAttribute('data-v'), ind: txt(A.ind), rev: A.rev ? txt(A.rev) : '-', emp: A.emp ? txt(A.emp) : '-', tier: '', price: '', won: [], why: '', sub: '', corp: false };
-      if (g === 'X') {
-        R.corp = true; R.tier = '법인'; R.price = '월 10만원부터'; R.won = [100000]; R.rev = '-'; R.emp = '-';
-        R.why = '법인은 장부 상태와 거래량을 보고 상담 때 확정해요.';
-        return R;
-      }
-      var b = band(g), t = rv === 'new' || rv === 'lo' ? 'L' : rv === 'mid' ? 'P' : rv === 'hi' ? 'S' : 'U';
-      if (t === 'L' && emp > 5) { t = 'P'; R.why = '4대보험 직원이 6명 이상이면 이 구간이에요.'; }
-      if (t === 'L') { R.tier = '기본 구간'; R.price = emp > 3 ? '월 6만원' : '월 5만원'; R.won = [emp > 3 ? 60000 : 50000]; if (emp <= 3) R.sub = '직원이 4~5명이면 월 6만원이에요.'; }
-      else if (t === 'U') { R.tier = '구간 확인 필요'; R.price = '월 5만원부터'; R.won = [50000]; R.why = '작년 매출에 따라 구간이 정해져요. 상담 때 홈택스 자료로 함께 확인해 드릴게요.'; }
-      else if (t === 'S') { R.tier = '성실신고확인 구간'; R.price = '월 12~15만원'; R.won = [120000, 150000]; R.why = '작년 매출이 ' + b.hi + ' 이상이면 성실신고확인 대상이라 이 구간이에요.'; }
-      else { R.tier = '중간 구간'; R.price = '월 7~8만원'; R.won = [70000, 80000]; if (!R.why) R.why = '작년 매출이 ' + b.lo + '을 넘으면 이 구간이에요.'; R.sub = '작년 매출이 ' + b.hi + ' 이상이 되면 월 12~15만원이에요.'; }
-      if (g === '?' && t !== 'L') R.why = (R.why ? R.why + ' ' : '') + '그 밖의 업종은 기준이 다를 수 있어 상담 때 확정해요.';
+      var g = IND_G[S.ind];
+      var R = { ind: IND_NAME[S.ind] || '-', rev: '-', emp: '-', tier: '', price: '월 5만원부터', won: [50000], why: '', from: true, corp: false, done: false };
+      if (!S.ind) return R;
+      if (g === 'X') { R.corp = true; R.tier = '법인'; R.price = '월 10만원부터'; R.won = [100000]; R.why = '법인은 장부 상태와 거래량을 보고 상담 때 확정해요.'; R.done = true; return R; }
+      var bb = BAND[g];
+      if (S.rev) R.rev = revText(g, S.rev);
+      if (S.emp) R.emp = EMP_NAME[S.emp];
+      var t = S.rev === 'mid' ? 'P' : S.rev === 'hi' ? 'S' : 'L';
+      if (t === 'L' && S.emp === '6') { t = 'P'; R.why = '4대보험 직원이 6명 이상이면 중간 구간이에요.'; }
+      R.from = !(S.rev && S.emp);
+      if (t === 'L') { R.tier = '기본 구간'; if (S.emp === '5') { R.price = '월 6만원'; R.won = [60000]; } else { R.price = R.from ? '월 5만원부터' : '월 5만원'; R.won = [50000]; } }
+      else if (t === 'P') { R.tier = '중간 구간'; R.price = '월 7~8만원'; R.won = [70000, 80000]; if (!R.why) R.why = '작년 매출이 ' + bb.lo + '을 넘으면 중간 구간이에요.'; }
+      else { R.tier = '성실신고확인 구간'; R.price = '월 12~15만원'; R.won = [120000, 150000]; R.why = '작년 매출이 ' + bb.hi + ' 이상이면 성실신고확인 대상이라 이 구간이에요.'; }
       /* 중간·성실 구간의 직원 수 상한은 아직 정하지 않음 → 6명 이상이면 상담 때 확정(규정 검수 11/4) */
-      if (emp > 5) R.why = (R.why ? R.why + ' ' : '') + '직원이 많으면 인원에 따라 상담 때 확정해요.';
+      if (S.emp === '6') {
+        R.why = (R.why ? R.why + ' ' : '') + '직원이 많으면 인원에 따라 상담 때 확정해요.';
+        /* 닫힌 범위(월 7~8만원)가 상한처럼 읽히지 않게 '부터'로(규정 검수 11/4 1회째) */
+        R.price = t === 'S' ? '월 12만원부터' : '월 7만원부터'; R.won = [t === 'S' ? 120000 : 70000]; R.from = true;
+      }
+      R.done = !!(S.rev && S.emp);
       return R;
     };
-    var inclLine = function (R) {
-      if (R.won.length === 2) return '부가세 포함 월 ' + won(R.won[0] * 1.1) + ' ~ ' + won(R.won[1] * 1.1);
-      return '부가세 포함 월 ' + won(R.won[0] * 1.1) + (R.corp || R.tier === '구간 확인 필요' ? '부터' : '');
-    };
-    var render = function (R, final) {
-      var items = R.corp ? ['법인 장부 정리', '부가가치세 신고', '직원 월급 신고(원천세)']
-        : ['장부 정리(복식부기)', '매달 매출 보고서', '부가가치세 신고', '직원 월급 신고(원천세)'];
-      resBox.innerHTML = '<p class="lbl">예상 기장료 · ' + esc(R.tier) + '</p>' +
+    var renderCalc = function () {
+      var R = compute();
+      var hint = !S.ind ? '업종부터 골라 주세요.' : R.corp ? '' : !S.rev ? '작년 매출을 고르면 더 정확해져요.' : !S.emp ? '직원 수를 고르면 확정돼요.' : '';
+      cres.innerHTML = '<p class="lbl">예상 기장료' + (R.tier ? ' · ' + esc(R.tier) : '') + '</p>' +
         '<p class="price num">' + esc(R.price) + '<small>부가세 별도</small></p>' +
-        '<p class="incl num">' + inclLine(R) + '</p>' +
+        (S.ind ? '<p class="incl num">' + inclLine(R) + '</p>' : '') +
         (R.why ? '<p class="why">' + esc(R.why) + '</p>' : '') +
-        (R.sub ? '<p class="why dim">' + esc(R.sub) + '</p>' : '') +
-        (!final ? '<p class="why dim">직원 수를 고르면 더 정확해져요.</p>' : '') +
-        '<ul>' + items.map(function (x) { return '<li>' + CK + esc(x) + '</li>'; }).join('') + '</ul>' +
-        '<p class="terms">6개월 약정 · ' + (R.corp ? '법인세' : '종합소득세') + ' 신고 비용은 따로(신고 전에 먼저 안내)</p>' +
-        '<div class="acts">' +
-          '<a class="btn btn-primary btn-block" href="' + KAKAO + '" data-kakao="calc" data-copy>' + KK + '이 결과로 카톡 상담</a>' +
-          '<a class="btn btn-line btn-block" href="#consult" data-track="consult_jump_calc">전화 상담 예약</a>' +
-        '</div>' +
-        '<p class="hint">카톡 버튼을 누르면 계산 결과가 복사돼요. 카톡 창에서 붙여넣기만 하세요.</p>';
-      if (!still) { resBox.classList.remove('pop'); void resBox.offsetWidth; resBox.classList.add('pop'); }
+        (hint ? '<p class="incl">' + hint + '</p>' : '');
+      cres.classList.toggle('done', R.done);
+      if (!still) { cres.classList.remove('pop'); void cres.offsetWidth; cres.classList.add('pop'); }
       /* 카톡에 붙여 넣는 글: 검색어는 넣지 않고 짧은 안내 번호만(N 네이버 광고 · G 구글 광고 · W 그 밖 - 쪽 이름) */
-      LAST = {
+      LAST = S.ind ? {
         R: R,
         text: '[택스민 기장료 상담]\n업종: ' + R.ind + '\n작년 매출: ' + R.rev + '\n4대보험 직원: ' + R.emp +
-          '\n예상 기장료: ' + R.price + ' (부가세 별도, ' + R.tier + ')\n(안내 번호 ' + ({ naver_ad: 'N', google_ad: 'G' }[SRC.key] || 'W') + '-' + PAGE.slice(5) + ')'
-      };
+          '\n예상 기장료: ' + R.price + ' (부가세 별도' + (R.tier ? ', ' + R.tier : '') + ')\n(안내 번호 ' + ({ naver_ad: 'N', google_ad: 'G' }[SRC.key] || 'W') + '-' + PAGE.replace(/^[a-z]+-/, '') + ')'
+      } : null;
       /* 전화 상담 폼의 업종: 손님이 직접 고르지 않았으면 계산 결과를 따라감 */
-      var cv = TO_CONSULT[R.key] || '서비스·기타';
       var f = $('[data-rsv]');
-      if (f) {
+      if (f && S.ind) {
         var cur = f.querySelector('input[name=ind]:checked');
         if (!cur || cur.hasAttribute('data-auto')) {
           if (cur) cur.removeAttribute('data-auto');
-          var r = f.querySelector('input[name=ind][value="' + cv + '"]');
+          var r = f.querySelector('input[name=ind][value="' + IND_NAME[S.ind] + '"]');
           if (r) { r.checked = true; r.setAttribute('data-auto', ''); }
         }
       }
-      if (final && !calcSent) { calcSent = true; track('calc_complete', { tier: R.tier, price: R.price }); }
-      dockSync();
+      if (R.done && !calcSent) { calcSent = true; track('calc_complete', { tier: R.tier, price: R.price }); }
     };
-    var next = function (el) {
-      requestAnimationFrame(function () {
-        var r = el.getBoundingClientRect();
-        if (r.top > window.innerHeight - 140 || r.bottom > window.innerHeight - 90) el.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'center' });
-      });
-    };
-    var pickInd = function (chip, silent) {
-      A.ind = chip; A.rev = null; A.emp = null;
-      press($('[data-name="ind"]', qBox), chip);
-      var g = chip.getAttribute('data-g');
-      if (!started && !silent) { started = true; track('calc_start', {}); }
-      if (g === 'X') { qs.rev.hidden = true; qs.emp.hidden = true; render(compute(), !silent); return; }
-      revLabels(g); qs.rev.hidden = false; qs.emp.hidden = true;
-      press(qs.emp, null);
-      /* 업종을 바꾸면 앞 업종의 결과를 지움(틀린 금액이 복사·접수되지 않게) */
-      LAST = null; resBox.innerHTML = RES0; dockSync();
-    };
-    qBox.addEventListener('click', function (ev) {
-      var more = ev.target.closest('[data-more]');
-      if (more) { $$('.chip[hidden]', qBox).forEach(function (c) { c.hidden = false; }); more.remove(); return; }
-      var chip = ev.target.closest('.chip'); if (!chip) return;
-      var name = chip.parentNode.getAttribute('data-name');
-      if (name === 'ind') { pickInd(chip); if (!qs.rev.hidden) next(qs.rev); }
-      else if (name === 'rev') { A.rev = chip; press(qs.rev, chip); qs.emp.hidden = false; render(compute(), !!A.emp); if (!A.emp) next(qs.emp); }
-      else if (name === 'emp') { A.emp = chip; press(qs.emp, chip); render(compute(), true); next(resBox); }
+    cdlg.addEventListener('click', function (ev) {
+      var btn = ev.target.closest('.cd-opts button'); if (!btn || btn.disabled) return;
+      var k = btn.parentNode.getAttribute('data-k'), v = btn.getAttribute('data-v');
+      S[k] = v;
+      $$('button', btn.parentNode).forEach(function (x) { x.setAttribute('aria-pressed', x === btn ? 'true' : 'false'); });
+      if (k === 'ind') {
+        if (IND_G[v] === 'X') { ['rev', 'emp'].forEach(function (q) { S[q] = null; $$('button', grp(q)).forEach(function (x) { x.disabled = true; x.setAttribute('aria-pressed', 'false'); }); }); }
+        else {
+          revLabels(IND_G[v]); $$('button', grp('emp')).forEach(function (x) { x.disabled = false; });
+          [['rev', 'lo'], ['emp', '3']].forEach(function (d) {
+            if (S[d[0]]) return;
+            S[d[0]] = d[1];
+            $$('button', grp(d[0])).forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-v') === d[1] ? 'true' : 'false'); });
+          });
+        }
+      }
+      if (!calcStarted) { calcStarted = true; track('calc_start', {}); }
+      renderCalc();
     });
-    var pre = box.getAttribute('data-ind');
-    if (pre) { var pc = $('.chip[data-v="' + pre + '"]', qBox); if (pc) { pc.hidden = false; pickInd(pc, true); } }
   }
 
   /* ── 업종 흐름띠: 칩을 한 벌 더 붙여 끝없이 흐르게(움직임 줄이기·캡처는 멈춘 채 여러 줄) · 화면 밖이면 멈춤 */
@@ -320,43 +318,77 @@
   if (marq && !still) {
     $$('.mtrack', marq).forEach(function (t) { t.innerHTML += t.innerHTML; });
     root.classList.add('js-mq');
-    onView(marq, function (v) { $$('.mtrack', marq).forEach(function (t) { t.style.animationPlayState = v ? 'running' : 'paused'; }); });
+    var mqVis = false, mqHold = false;
+    /* 화면 밖·첫 화면 멈춤 단추·마우스 올림·손가락으로 누르고 있을 때는 멈춤 */
+    mqSet = function () { var on = mqVis && !mqHold && !paused; $$('.mtrack', marq).forEach(function (t) { t.style.animationPlayState = on ? 'running' : 'paused'; }); };
+    onView(marq, function (v) { mqVis = v; mqSet(); });
+    marq.addEventListener('mouseenter', function () { mqHold = true; mqSet(); });
+    marq.addEventListener('mouseleave', function () { mqHold = false; mqSet(); });
+    marq.addEventListener('touchstart', function () { mqHold = true; mqSet(); }, { passive: true });
+    marq.addEventListener('touchend', function () { mqHold = false; mqSet(); }, { passive: true });
   }
 
-  /* ── 숫자 세기(마무리 카드): 보일 때 한 번 */
+  /* ── 카드 모션그래픽(Higgsfield 영상): 보일 때 처음부터 한 번 재생, 화면 밖이면 멈춤(움직임 줄이기·캡처는 첫 장면 그림) */
+  if (!still && IO) {
+    $$('video.fv').forEach(function (v) {
+      /* 끝나면 data-rest 장면(영수증: 빛줄기·체크가 함께 보이는 3초)이나 마지막 장면에서 멈춤(되풀이 재생 없음) */
+      v.addEventListener('ended', function () { var r = v.getAttribute('data-rest'); if (r) { try { v.currentTime = +r; } catch (x) {} } });
+      onView(v, function (on) {
+        if (on) {
+          if (!v.src) v.src = v.getAttribute('data-src');
+          try { v.currentTime = 0; } catch (x) {}
+          var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
+        } else if (v.src) v.pause();
+      }, { threshold: 0.5 });
+    });
+  }
+
+  /* ── 숫자 세기(마무리 카드의 누적 고객만 — 가격은 세지 않음): 보이기 시작할 때 한 번. 그 전에는 늘 진짜 값이 보임 */
   var stats = $('[data-stats]');
   if (stats && !still && IO) {
     var ems = $$('[data-count]', stats), done = false;
-    ems.forEach(function (el) { el.textContent = '0'; });
     onView(stats, function (v) {
       if (!v || done) return; done = true;
+      ems.forEach(function (el) { el.textContent = '0'; });
       var t0 = performance.now();
       (function step(now) {
         var p = Math.min(1, (now - t0) / 1200), k = 1 - Math.pow(1 - p, 3);
         ems.forEach(function (el) { el.textContent = Math.round(+el.getAttribute('data-count') * k).toLocaleString('ko-KR'); });
         if (p < 1) requestAnimationFrame(step);
       })(t0);
-    }, { threshold: 0.4 });
+    }, { threshold: 0.15 });
   }
 
   /* ── PC 카톡 안내 창 */
   var pcDlg = $('#kk-pc');
   function openDlg(d) { if (!d) return; if (typeof d.showModal === 'function') { if (!d.open) d.showModal(); } else d.setAttribute('open', ''); }
   function closeDlg(d) { if (!d) return; if (typeof d.close === 'function') d.close(); else d.removeAttribute('open'); }
-  if (pcDlg) pcDlg.addEventListener('click', function (ev) { if (ev.target === pcDlg || ev.target.closest('[data-close]')) closeDlg(pcDlg); });
+  [pcDlg, cdlg].forEach(function (d) { if (d) d.addEventListener('click', function (ev) { if (ev.target === d || ev.target.closest('[data-close]')) closeDlg(d); }); });
 
   /* ── 클릭: 카톡·전화·기타 */
   doc.addEventListener('click', function (ev) {
+    var oc = ev.target.closest('[data-open-calc]');
+    if (oc && cdlg) {
+      ev.preventDefault(); openDlg(cdlg); dockSync();
+      var pre = oc.getAttribute('data-ind'), pb = pre ? $('[data-k="ind"] [data-v="' + pre + '"]', cdlg) : null;
+      if (pb) pb.click();
+      track('calc_open', { position: oc.getAttribute('data-open-calc') + (pre ? ':' + pre : '') }); return;
+    }
     var a = ev.target.closest('[data-kakao]');
     if (a) {
       var copied = a.hasAttribute('data-copy') && LAST ? copyText(LAST.text) : false;
       track('kakao_click', { position: a.getAttribute('data-kakao'), device: isPC() ? 'pc' : 'mobile' });
+      if (isPC() && pcDlg) {
+        ev.preventDefault(); var inD = a.closest('dialog'); if (inD && inD !== pcDlg) closeDlg(inD);
+        var pcc = $('[data-pc-copied]', pcDlg); if (pcc) pcc.hidden = !copied;   /* 복사는 PC 에 됐으니 PC 카톡에 붙여 넣으라고 */
+        openDlg(pcDlg); return;
+      }
       if (copied) toast('계산 결과를 복사했어요. 카톡 창에 붙여넣어 보내 주세요.');
-      if (isPC() && pcDlg) { ev.preventDefault(); openDlg(pcDlg); return; }
-      /* 휴대폰: 같은 탭에서 채널 채팅 주소로 이동. 광고 전환 태그가 켜져 있으면 신호가 나갈 틈(0.3초)을 둔다. */
-      if ((C.gads || C.naverWa) && !(ev.metaKey || ev.ctrlKey || ev.shiftKey)) {
+      /* 휴대폰: 같은 탭에서 채널 채팅 주소로 이동. 복사했으면 알림을 0.8초 보여 주고, 광고 전환 태그가 켜져 있으면 신호가 나갈 틈(0.3초)을 둔다. */
+      var wait = copied ? 800 : (C.gads || C.naverWa) ? 300 : 0;
+      if (wait && !(ev.metaKey || ev.ctrlKey || ev.shiftKey)) {
         ev.preventDefault(); var goTo = a.href;
-        setTimeout(function () { location.href = goTo; }, 300);
+        setTimeout(function () { location.href = goTo; }, wait);
       }
       return;
     }
@@ -367,13 +399,17 @@
   });
 
   /* ── 아래 고정 버튼: 첫 화면 버튼이 안 보일 때만. 계산 결과·상담 판·마무리가 보이거나 입력 중이면 숨김 */
-  var dock = $('[data-dock]'), heroCta = $('.hero .cta'), consultEl = $('#consult'), endEl = $('.closing');
-  var vis = { hero: true, consult: false, end: false, calc: false }, typing = false;
-  function dockSync() { if (dock && vis) dock.classList.toggle('hide', vis.hero || vis.consult || vis.end || (vis.calc && !!LAST) || typing); }
-  if (dock && IO) {
+  var dock = $('[data-dock]'), fab = $('.fab'), heroCta = $('.hero .cta'), consultEl = $('#consult'), endEl = $('.closing');
+  var vis = { hero: true, consult: false, end: false }, typing = false;
+  function dockSync() {
+    if (dock && vis) dock.classList.toggle('hide', vis.hero || vis.consult || vis.end || typing || !!(cdlg && cdlg.open));
+    if (fab && vis) fab.classList.toggle('hide', vis.hero);   /* PC: 첫 화면 카톡 버튼과 겹쳐 셋이 되지 않게 */
+  }
+  if ((dock || fab) && IO) {
     var watch = function (el, k) { if (el) new IntersectionObserver(function (es) { vis[k] = es[0].isIntersecting; dockSync(); }, { threshold: 0 }).observe(el); };
-    watch(heroCta, 'hero'); watch(consultEl, 'consult'); watch(endEl, 'end'); watch(resBox, 'calc');
-  } else if (dock) { dock.classList.remove('hide'); }
+    watch(heroCta, 'hero'); watch(consultEl, 'consult'); watch(endEl, 'end');
+    if (cdlg) cdlg.addEventListener('close', dockSync);
+  } else { if (dock) dock.classList.remove('hide'); if (fab) fab.classList.remove('hide'); }
   doc.addEventListener('focusin', function (ev) { if (ev.target.matches && ev.target.matches('input, textarea')) { typing = true; dockSync(); } });
   doc.addEventListener('focusout', function () { typing = false; dockSync(); });
 
@@ -381,16 +417,37 @@
   (function () {
     var k = new Date(Date.now() + 9 * 36e5), d = k.getUTCDay(), m = k.getUTCHours() * 60 + k.getUTCMinutes();
     if (d >= 1 && d <= 5 && m >= 600 && m < 1050) return;
+    $$('[data-hours-tel]').forEach(function (b) {
+      b.setAttribute('href', '#rsv'); b.removeAttribute('data-tel'); b.setAttribute('data-track', 'consult_jump_hero');
+      b.classList.add('off'); var t = $('[data-tel-t]', b); if (t) t.textContent = '전화 예약';
+    });
     var a = $('[data-tel="dock"]'); if (!a) return;
-    a.setAttribute('href', '#consult'); a.removeAttribute('data-tel');
-    a.setAttribute('data-track', 'consult_jump_dock'); a.setAttribute('aria-label', '전화 상담 예약');
+    a.setAttribute('href', '#rsv'); a.removeAttribute('data-tel');
+    a.setAttribute('data-track', 'consult_jump_dock'); a.removeAttribute('aria-label');   /* 보이는 글 '전화 예약'이 곧 이름 */
     var s = $('[data-dock-t]', a); if (s) s.textContent = '전화 예약';
   })();
+
+  /* ── 전화 예약 접힘: '#rsv' 로 가는 버튼(전화 예약·계산 팝업·고정 바·PC 안내 창)을 누르면 펼치고 예약 칸 맨 위로 옮김.
+        넓은 화면(960px 이상)은 처음부터 펼침 — 카톡 판 옆이 비지 않게 */
+  var rsvWrap = $('[data-rsv-wrap]');
+  if (rsvWrap) {
+    if (window.matchMedia && window.matchMedia('(min-width: 960px)').matches) rsvWrap.open = true;
+    doc.addEventListener('click', function (ev) {
+      var a = ev.target.closest('a[href="#rsv"]');
+      if (!a) return;
+      ev.preventDefault(); rsvWrap.open = true;
+      track('rsv_open', { position: a.getAttribute('data-track') || '' });
+      requestAnimationFrame(function () {
+        rsvWrap.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
+        var sm = $('summary', rsvWrap); if (sm) { try { sm.focus({ preventScroll: true }); } catch (x) {} }
+      });
+    });
+  }
 
   /* ── 전화 상담(페이지 안 폼 → 구글 Apps Script → 사무소 시트·메일). 서버가 받았다고 답할 때만 '접수됐어요' */
   var form = $('[data-rsv]');
   if (form) {
-    var nI = $('#r-name', form), tI = $('#r-tel', form), oI = $('#r-ok', form);
+    var nI = $('#r-name', form), tI = $('#r-tel', form), oI = $('#r-ok', form), oI2 = $('#r-ok2', form);
     var out = $('.msg', form), sb = $('button[type=submit]', form);
     tI.addEventListener('input', function () {
       var d = tI.value.replace(/\D/g, '');
@@ -399,7 +456,7 @@
       var mid = d.length === 10 ? 6 : 7;
       tI.value = d.length < 4 ? d : d.length <= mid ? d.slice(0, 3) + '-' + d.slice(3) : d.slice(0, 3) + '-' + d.slice(3, mid) + '-' + d.slice(mid);
     });
-    tI.addEventListener('input', function () { tI.parentNode.classList.remove('bad'); });
+    tI.addEventListener('input', function () { tI.parentNode.classList.remove('bad'); tI.removeAttribute('aria-invalid'); tI.removeAttribute('aria-describedby'); });
     /* 손님이 업종을 직접 고르면 계산기가 더는 바꾸지 않음 */
     form.addEventListener('change', function (e) { if (e.target.name === 'ind') $$('input[name=ind]', form).forEach(function (x) { x.removeAttribute('data-auto'); }); });
     form.addEventListener('submit', function (ev) {
@@ -407,18 +464,18 @@
       var tel = tI.value.trim(), digits = tel.replace(/\D/g, '');
       if (/^8210/.test(digits)) digits = '0' + digits.slice(2);
       /* 010 은 11자리만, 옛 011·016~019 는 10~11자리 */
-      if (!/^(010\d{8}|01[16789]\d{7,8})$/.test(digits)) { tI.parentNode.classList.add('bad'); out.textContent = '휴대폰 번호를 확인해 주세요. 예) 010-1234-5678'; tI.focus(); return; }
+      if (!/^(010\d{8}|01[16789]\d{7,8})$/.test(digits)) { tI.parentNode.classList.add('bad'); tI.setAttribute('aria-invalid', 'true'); tI.setAttribute('aria-describedby', 'r-msg'); out.textContent = '휴대폰 번호를 확인해 주세요. 예) 010-1234-5678'; tI.focus(); return; }
       if (!oI.checked) { out.textContent = '개인정보 수집·이용에 동의해 주세요.'; oI.focus(); return; }
       if (!ENDPOINT) { out.textContent = '지금은 온라인 예약을 받을 수 없어요. 전화(' + TEL + ')나 카톡으로 연락 주세요.'; return; }
       var when = (form.querySelector('input[name=when]:checked') || {}).value || '언제든';
       var ind = (form.querySelector('input[name=ind]:checked') || {}).value || '';
-      var R = LAST ? LAST.R : null;
+      var R = LAST ? LAST.R : null, adOk = !!(oI2 && oI2.checked);   /* 들어온 곳·광고·캠페인은 [선택] 동의가 있을 때만 */
       var data = {
         type: 'lead', '요청': '전화 상담 예약', '이름': nI.value.trim() || '(호칭 없음)', '연락처': tel, '통화 편한 시간': when,
         '업종': ind || (R ? R.ind : '-'), '남기실 말씀': R ? '계산기 업종: ' + R.ind : '',
         '작년 매출': R ? R.rev : '-', '직원(4대보험)': R ? R.emp : '-', '추천 요금제': R ? R.tier : '-',
         '예상 기장료': R ? R.price + ' (부가세 별도)' : '-',
-        '들어온 곳': SRC.full, '광고': SRC.ad || '-', '캠페인': SRC.camp || '-', '시안': PAGE,
+        '들어온 곳': adOk ? SRC.full : '(광고 확인 동의 안 함)', '광고': adOk ? (SRC.ad || '-') : '-', '캠페인': adOk ? (SRC.camp || '-') : '-', '시안': PAGE,
         '개인정보 수집·이용 동의': '동의함', '_honey': (form.querySelector('[name=hp]') || {}).value || ''
       };
       sb.disabled = true; sb.textContent = '보내는 중…';
@@ -431,9 +488,10 @@
           if (t !== 'ok' && t !== 'dup' && t !== 'held') return fail();
           track('form_submit', {});
           var whenTxt = when === '언제든' ? '평일 10:00–17:30 중 편하실 때' : when + '에';
-          form.outerHTML = '<div class="consult done" role="status"><div class="ok">' + CK + '</div><h2>접수됐어요</h2>' +
+          form.outerHTML = '<div class="consult done" role="status" tabindex="-1"><div class="ok">' + CK + '</div><h2>접수됐어요</h2>' +
             '<p>' + esc(whenTxt) + ' ' + esc(tel) + '로 전화드릴게요.<br>급하시면 카톡으로 먼저 말씀해 주세요.</p>' +
             '<a class="btn btn-primary btn-block" href="' + KAKAO + '" data-kakao="done" data-copy>' + KK + '카톡으로도 바로 묻기</a></div>';
+          var dn = $('.consult.done'); if (dn) { try { dn.focus(); } catch (x) {} }   /* 초점이 사라지지 않게 접수 안내로 */
         })
         .catch(function () { fail(); });
     });
