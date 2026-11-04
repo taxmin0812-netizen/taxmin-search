@@ -235,6 +235,29 @@
     fitIll(); window.addEventListener('resize', fitIll, { passive: true });
   }
 
+  /* ── 첫 화면 그림(사진 + 카드): 1024×650 판을 틀 폭에 맞춤 */
+  var hcF = $('.hc-frame');
+  if (hcF) { var fitHc = function () { hcF.style.setProperty('--k', ((hcF.clientWidth || 358) / 1024).toFixed(4)); }; fitHc(); window.addEventListener('resize', fitHc, { passive: true }); }
+
+  /* ── 업종 사진: 단추 없이 3.2초마다 한 장씩 자동으로 넘김(끝이면 처음으로) · 손가락·마우스를 대면 잠시 멈춤 · 화면 밖·움직임 줄이기면 안 움직임 */
+  var indA = $('[data-inds]');
+  if (indA && !still && IO) {
+    var aVis = false, aHold = false, aT = null;
+    onView(indA, function (v) { aVis = v; });
+    setInterval(function () {
+      if (!aVis || aHold || doc.hidden) return;
+      var c0 = $('.ind-card', indA), gap = parseFloat(getComputedStyle(indA).columnGap) || 16;
+      var stepW = c0 ? c0.getBoundingClientRect().width + gap : 320;
+      var end = indA.scrollLeft + indA.clientWidth >= indA.scrollWidth - 8;
+      indA.scrollTo({ left: end ? 0 : indA.scrollLeft + stepW, behavior: 'smooth' });
+    }, 3200);
+    var aStop = function () { aHold = true; clearTimeout(aT); };
+    var aGo = function () { clearTimeout(aT); aT = setTimeout(function () { aHold = false; }, 5000); };
+    ['pointerdown', 'mouseenter', 'focusin'].forEach(function (n) { indA.addEventListener(n, aStop); });
+    ['pointerup', 'mouseleave', 'focusout'].forEach(function (n) { indA.addEventListener(n, aGo); });
+    indA.addEventListener('touchstart', aStop, { passive: true }); indA.addEventListener('touchend', aGo, { passive: true });
+  }
+
   /* ── 업종 사진 카드: 옆으로 넘김(손가락으로 밀기 + 단추 · PC 는 제목 옆, 휴대폰은 카드 아래) */
   var indT = $('[data-inds]');
   if (indT) {
@@ -301,7 +324,7 @@
       var hint = !S.ind ? '업종부터 골라 주세요.' : R.corp ? '' : !S.rev ? '작년 매출을 고르면 더 정확해져요.' : !S.emp ? '직원 수를 고르면 확정돼요.' : '';
       var g0 = IND_G[S.ind], bb0 = BAND[g0];
       var base = !S.ind ? '' : R.corp ? '법인 · 장부 상태와 거래량을 보고 확정' : R.ind + ' · 작년 매출 ' + R.rev + ' · 4대보험 직원 ' + R.emp;
-      var chg = (S.ind && !R.corp && S.rev === 'lo' && S.emp === '3' && bb0) ? '작년 매출이 ' + bb0.lo + '을 넘거나 직원이 4명 이상이면 달라져요. 위에서 바꿔 눌러 보세요.' : '';
+      var chg = (S.ind && !R.corp && S.rev === 'lo' && S.emp === '3' && bb0) ? '작년 매출이 ' + bb0.lo + '을 넘거나 직원이 4명 이상이면 달라져요' : '';
       cres.innerHTML = '<p class="lbl">예상 기장료' + (R.tier ? ' · ' + esc(R.tier) : '') + '</p>' +
         '<p class="price num">' + esc(R.price) + '<small>부가세 별도</small></p>' +
         (S.ind ? '<p class="incl num">' + inclLine(R) + '</p>' : '') +
@@ -309,7 +332,7 @@
         (hint ? '<p class="incl">' + hint + '</p>' : '') +
         (S.ind ? '<dl class="cd-dl"><div><dt>기준</dt><dd>' + esc(base) + '</dd></div>' +
           '<div><dt>포함</dt><dd>장부 정리 · 부가세 신고 · 직원 월급 신고 · 매달 매출 보고서</dd></div>' +
-          '<div><dt>별도</dt><dd>' + (R.corp ? '법인세' : '종합소득세') + ' 신고비(1년에 한 번, 신고 전에 금액을 먼저 알려 드려요)</dd></div>' +
+          '<div><dt>별도</dt><dd>' + (R.corp ? '법인세' : '종합소득세') + ' 신고비(1년 1번 · 신고 전에 금액 안내)</dd></div>' +
           (chg ? '<div><dt>달라지면</dt><dd>' + esc(chg) + '</dd></div>' : '') + '</dl>' : '');
       cres.classList.toggle('done', R.done);
       if (!still) { cres.classList.remove('pop'); void cres.offsetWidth; cres.classList.add('pop'); }
@@ -414,7 +437,8 @@
   doc.addEventListener('click', function (ev) {
     var oc = ev.target.closest('[data-open-calc]');
     if (oc && cdlg) {
-      ev.preventDefault(); openDlg(cdlg); dockSync();
+      ev.preventDefault(); var ocD = oc.closest('dialog'); if (ocD && ocD !== cdlg) closeDlg(ocD);
+      openDlg(cdlg); dockSync();
       var pre = oc.getAttribute('data-ind'), pb = pre ? $('[data-k="ind"] [data-v="' + pre + '"]', cdlg) : null;
       if (pb) pb.click();
       track('calc_open', { position: oc.getAttribute('data-open-calc') + (pre ? ':' + pre : '') }); return;
@@ -428,7 +452,7 @@
         var pcc = $('[data-pc-copied]', pcDlg); if (pcc) pcc.hidden = !copied;   /* 복사는 PC 에 됐으니 PC 카톡에 붙여 넣으라고 */
         openDlg(pcDlg); return;
       }
-      if (copied) toast('계산 결과를 복사했어요. 카톡 창에 붙여넣어 보내 주세요.');
+      if (copied) toast('계산 결과를 복사했어요 · 카톡에 붙여 넣어 주세요');
       /* 휴대폰: 같은 탭에서 채널 채팅 주소로 이동. 복사했으면 알림을 0.8초 보여 주고, 광고 전환 태그가 켜져 있으면 신호가 나갈 틈(0.3초)을 둔다. */
       var wait = copied ? 800 : (C.gads || C.naverWa) ? 300 : 0;
       if (wait && !(ev.metaKey || ev.ctrlKey || ev.shiftKey)) {
@@ -444,7 +468,7 @@
   });
 
   /* ── 아래 고정 버튼: 첫 화면 버튼이 안 보일 때만. 계산 결과·상담 판·마무리가 보이거나 입력 중이면 숨김 */
-  var dock = $('[data-dock]'), fab = $('.fab'), heroCta = $('.hero .cta'), consultEl = $('#consult'), endEl = $('.closing');
+  var dock = $('[data-dock]'), fab = $('[data-ask]'), heroCta = $('.hero .cta'), consultEl = $('#consult'), endEl = $('.closing');
   var vis = { hero: true, consult: false, end: false }, typing = false;
   function dockSync() {
     if (dock && vis) dock.classList.toggle('hide', vis.hero || vis.consult || vis.end || typing || !!(cdlg && cdlg.open) || !!(rsvDlg && rsvDlg.open));
@@ -472,6 +496,16 @@
     var s = $('[data-dock-t]', a); if (s) s.textContent = '전화 예약';
   })();
 
+  /* ── 아래 떠 있는 '택스민 기장 문의'(웍스 '도입 문의' 꼴): 누르면 카톡 상담·예약 상담·전화 상담 */
+  var askBtn = $('[data-ask-btn]'), askMenu = $('#ask-menu');
+  if (askBtn && askMenu) {
+    var askSet = function (on) { askMenu.hidden = !on; askBtn.setAttribute('aria-expanded', on ? 'true' : 'false'); };
+    askBtn.addEventListener('click', function (ev) { ev.stopPropagation(); var on = askMenu.hidden; askSet(on); if (on) track('ask_open', {}); });
+    doc.addEventListener('click', function (ev) { if (!askMenu.hidden && !ev.target.closest('[data-ask]')) askSet(false); });
+    doc.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !askMenu.hidden) { askSet(false); askBtn.focus(); } });
+    askMenu.addEventListener('click', function () { setTimeout(function () { askSet(false); }, 0); });
+  }
+
   /* ── 전화 예약: '#rsv' 로 가는 버튼(첫 화면 시간 밖·고정 바·계산 팝업·PC 안내 창·마무리 띠)을 누르면 예약 팝업 */
   if (rsvDlg) {
     doc.addEventListener('click', function (ev) {
@@ -489,8 +523,35 @@
   /* ── 전화 상담(페이지 안 폼 → 구글 Apps Script → 사무소 시트·메일). 서버가 받았다고 답할 때만 '접수됐어요' */
   var form = $('[data-rsv]');
   if (form) {
-    var nI = $('#r-name', form), tI = $('#r-tel', form), oI = $('#r-ok', form), oI2 = $('#r-ok2', form);
+    var tI = $('#r-tel', form), oI = $('#r-ok', form), oI2 = $('#r-ok2', form);
     var out = $('.msg', form), sb = $('button[type=submit]', form);
+    /* 단계별 간단 신청: 업종 카드 → 작년 매출 카드 → 번호·동의. 카드를 누르면 바로 다음 단계 · 진행 막대가 참 · > 는 동의 내용 펼치기 */
+    var steps = $$('.ld-step', form), stepNo = 1, dlgEl = form.closest('dialog') || doc;
+    var bar = $('[data-ld-bar]', dlgEl), tip = $('[data-ld-tip]', dlgEl), pick = $('[data-ld-pick]', form), more = $('[data-ld-more]', form), terms = $('#ld-terms', form);
+    var val = function (n) { return (form.querySelector('input[name=' + n + ']:checked') || {}).value || ''; };
+    var ldSync = function () {
+      var d = tI.value.replace(/\D/g, ''), okT = /^(010\d{8}|01[16789]\d{7,8})$/.test(d), okC = oI.checked;
+      var pct = stepNo === 1 ? 22 : stepNo === 2 ? 50 : okT && okC ? 100 : okT || okC ? 88 : 76;
+      if (bar) bar.style.width = pct + '%';
+      if (tip) { tip.style.left = 'min(calc(' + pct + '% - 8px), calc(100% - 66px))'; tip.innerHTML = stepNo === 3 ? '거의 <b>다 됐어요!</b>' : '신청까지 <b>10초!</b>'; }
+      sb.classList.toggle('on', okT && okC);
+    };
+    var goStep = function (n) {
+      stepNo = Math.max(1, Math.min(3, n));
+      steps.forEach(function (st) { st.classList.toggle('on', +st.getAttribute('data-step') === stepNo); });
+      if (pick && stepNo === 3) pick.textContent = [val('ind'), val('rev') ? '작년 매출 ' + val('rev') : ''].filter(Boolean).join(' · ');
+      ldSync();
+      if (stepNo === 3 && isPC()) { try { tI.focus({ preventScroll: true }); } catch (x) {} }
+    };
+    form.addEventListener('click', function (e) {
+      var r = e.target.closest('input[type=radio]'); if (!r) return;
+      var st = +r.closest('.ld-step').getAttribute('data-step');
+      track('rsv_step', { step: st, value: r.value });
+      setTimeout(function () { goStep(st + 1); }, 160);
+    });
+    $$('[data-ld-back]', form).forEach(function (b) { b.addEventListener('click', function () { goStep(stepNo - 1); }); });
+    tI.addEventListener('input', ldSync); oI.addEventListener('change', ldSync); goStep(1);
+    if (more && terms) more.addEventListener('click', function () { var on = terms.hidden; terms.hidden = !on; more.setAttribute('aria-expanded', on ? 'true' : 'false'); });
     tI.addEventListener('input', function () {
       var d = tI.value.replace(/\D/g, '');
       if (/^8210/.test(d)) d = '0' + d.slice(2);
@@ -511,17 +572,18 @@
       if (!ENDPOINT) { out.textContent = '지금은 온라인 예약을 받을 수 없어요. 전화(' + TEL + ')나 카톡으로 연락 주세요.'; return; }
       var when = (form.querySelector('input[name=when]:checked') || {}).value || '언제든';
       var ind = (form.querySelector('input[name=ind]:checked') || {}).value || '';
+      var rv = (form.querySelector('input[name=rev]:checked') || {}).value || '';   /* 호칭 칸 대신 작년 매출(선택) — 시트 칸 이름은 그대로 */
       var R = LAST ? LAST.R : null, adOk = !!(oI2 && oI2.checked);   /* 들어온 곳·광고·캠페인은 [선택] 동의가 있을 때만 */
       var data = {
-        type: 'lead', '요청': '전화 상담 예약', '이름': nI.value.trim() || '(호칭 없음)', '연락처': tel, '통화 편한 시간': when,
-        '업종': ind || (R ? R.ind : '-'), '남기실 말씀': R ? '계산기 업종: ' + R.ind : '',
-        '작년 매출': R ? R.rev : '-', '직원(4대보험)': R ? R.emp : '-', '추천 요금제': R ? R.tier : '-',
+        type: 'lead', '요청': '전화 상담 예약', '이름': '(호칭 없음)', '연락처': tel, '통화 편한 시간': when,
+        '업종': ind || (R ? R.ind : '-'), '남기실 말씀': R ? '계산기: ' + R.ind + ' · ' + R.rev + ' · 직원 ' + R.emp : '',
+        '작년 매출': rv || (R ? R.rev : '-'), '직원(4대보험)': R ? R.emp : '-', '추천 요금제': R ? R.tier : '-',
         '예상 기장료': R ? R.price + ' (부가세 별도)' : '-',
         '들어온 곳': adOk ? SRC.full : '(광고 확인 동의 안 함)', '광고': adOk ? (SRC.ad || '-') : '-', '캠페인': adOk ? (SRC.camp || '-') : '-', '시안': PAGE,
         '개인정보 수집·이용 동의': '동의함', '_honey': (form.querySelector('[name=hp]') || {}).value || ''
       };
       sb.disabled = true; sb.textContent = '보내는 중…';
-      var fail = function (t) { sb.disabled = false; sb.textContent = '상담 전화 받기'; out.textContent = t || '보내지 못했어요. 잠시 뒤 다시 하시거나 전화(' + TEL + ')·카톡으로 연락 주세요.'; };
+      var fail = function (t) { sb.disabled = false; sb.textContent = '상담 신청하기'; out.textContent = t || '보내지 못했어요. 잠시 뒤 다시 하시거나 전화(' + TEL + ')·카톡으로 연락 주세요.'; };
       fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) })
         .then(function (r) { return r.text(); })
         .then(function (t) {
@@ -531,7 +593,7 @@
           track('form_submit', {});
           var whenTxt = when === '언제든' ? '평일 10:00–17:30 중 편하실 때' : when + '에';
           form.outerHTML = '<div class="consult done" role="status" tabindex="-1"><div class="ok">' + CK + '</div><h2>접수됐어요</h2>' +
-            '<p>' + esc(whenTxt) + ' ' + esc(tel) + '로 전화드릴게요.<br>급하시면 카톡으로 먼저 말씀해 주세요.</p>' +
+            '<p>' + esc(whenTxt) + ' ' + esc(tel) + '로 전화드릴게요</p>' +
             '<a class="btn btn-primary btn-block" href="' + KAKAO + '" data-kakao="done" data-copy>' + KK + '카톡으로도 바로 묻기</a></div>';
           var dn = $('.consult.done'); if (dn) { try { dn.focus(); } catch (x) {} }   /* 초점이 사라지지 않게 접수 안내로 */
         })
