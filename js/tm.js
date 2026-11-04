@@ -387,10 +387,10 @@
   }
 
   /* ── PC 카톡 안내 창 */
-  var pcDlg = $('#kk-pc');
+  var pcDlg = $('#kk-pc'), rsvDlg = $('#rsv-dlg');
   function openDlg(d) { if (!d) return; if (typeof d.showModal === 'function') { if (!d.open) d.showModal(); } else d.setAttribute('open', ''); }
   function closeDlg(d) { if (!d) return; if (typeof d.close === 'function') d.close(); else d.removeAttribute('open'); }
-  [pcDlg, cdlg].forEach(function (d) { if (d) d.addEventListener('click', function (ev) { if (ev.target === d || ev.target.closest('[data-close]')) closeDlg(d); }); });
+  [pcDlg, cdlg, rsvDlg].forEach(function (d) { if (d) d.addEventListener('click', function (ev) { if (ev.target === d || ev.target.closest('[data-close]')) closeDlg(d); }); });
 
   /* ── 클릭: 카톡·전화·기타 */
   doc.addEventListener('click', function (ev) {
@@ -429,7 +429,7 @@
   var dock = $('[data-dock]'), fab = $('.fab'), heroCta = $('.hero .cta'), consultEl = $('#consult'), endEl = $('.closing');
   var vis = { hero: true, consult: false, end: false }, typing = false;
   function dockSync() {
-    if (dock && vis) dock.classList.toggle('hide', vis.hero || vis.consult || vis.end || typing || !!(cdlg && cdlg.open));
+    if (dock && vis) dock.classList.toggle('hide', vis.hero || vis.consult || vis.end || typing || !!(cdlg && cdlg.open) || !!(rsvDlg && rsvDlg.open));
     if (fab && vis) fab.classList.toggle('hide', vis.hero);   /* PC: 첫 화면 카톡 버튼과 겹쳐 셋이 되지 않게 */
   }
   if ((dock || fab) && IO) {
@@ -454,21 +454,18 @@
     var s = $('[data-dock-t]', a); if (s) s.textContent = '전화 예약';
   })();
 
-  /* ── 전화 예약 접힘: '#rsv' 로 가는 버튼(전화 예약·계산 팝업·고정 바·PC 안내 창)을 누르면 펼치고 예약 칸 맨 위로 옮김.
-        넓은 화면(960px 이상)은 처음부터 펼침 — 카톡 판 옆이 비지 않게 */
-  var rsvWrap = $('[data-rsv-wrap]');
-  if (rsvWrap) {
-    if (window.matchMedia && window.matchMedia('(min-width: 960px)').matches) rsvWrap.open = true;
+  /* ── 전화 예약: '#rsv' 로 가는 버튼(첫 화면 시간 밖·고정 바·계산 팝업·PC 안내 창·마무리 띠)을 누르면 예약 팝업 */
+  if (rsvDlg) {
     doc.addEventListener('click', function (ev) {
       var a = ev.target.closest('a[href="#rsv"]');
       if (!a) return;
-      ev.preventDefault(); rsvWrap.open = true;
+      ev.preventDefault();
+      var inD = a.closest('dialog'); if (inD && inD !== rsvDlg) closeDlg(inD);
+      openDlg(rsvDlg); dockSync();
       track('rsv_open', { position: a.getAttribute('data-track') || '' });
-      requestAnimationFrame(function () {
-        rsvWrap.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
-        var sm = $('summary', rsvWrap); if (sm) { try { sm.focus({ preventScroll: true }); } catch (x) {} }
-      });
+      var t = $('#r-tel', rsvDlg); if (t && isPC()) { try { t.focus({ preventScroll: true }); } catch (x) {} }
     });
+    rsvDlg.addEventListener('close', dockSync);
   }
 
   /* ── 전화 상담(페이지 안 폼 → 구글 Apps Script → 사무소 시트·메일). 서버가 받았다고 답할 때만 '접수됐어요' */
