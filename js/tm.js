@@ -228,6 +228,24 @@
     }
   }
 
+  /* ── 첫 화면 그림: 480×380 캔버스를 틀 폭에 맞춰 키우거나 줄임(휴대폰·PC 같은 구도) */
+  var illF = $('.show-frame.ill');
+  if (illF) {
+    var fitIll = function () { var w = illF.clientWidth || 358; illF.style.setProperty('--k', Math.max(.6, Math.min(1.32, w / 480)).toFixed(4)); };
+    fitIll(); window.addEventListener('resize', fitIll, { passive: true });
+  }
+
+  /* ── 업종 사진 카드: 옆으로 넘김(손가락으로 밀기 + 단추 · PC 는 제목 옆, 휴대폰은 카드 아래) */
+  var indT = $('[data-inds]');
+  if (indT) {
+    var ipv = $$('[data-inds-prev]'), inx = $$('[data-inds-next]');
+    var indStep = function (dd) { var c = $('.ind-card', indT); var w = c ? c.getBoundingClientRect().width + (parseFloat(getComputedStyle(indT).columnGap) || 16) : 320; indT.scrollBy({ left: dd * w, behavior: still ? 'auto' : 'smooth' }); };
+    var indSync = function () { var st = indT.scrollLeft < 8, en = indT.scrollLeft + indT.clientWidth > indT.scrollWidth - 8; ipv.forEach(function (x) { x.disabled = st; }); inx.forEach(function (x) { x.disabled = en; }); };
+    ipv.forEach(function (x) { x.addEventListener('click', function () { indStep(-1); track('inds_prev', {}); }); });
+    inx.forEach(function (x) { x.addEventListener('click', function () { indStep(1); track('inds_next', {}); }); });
+    indT.addEventListener('scroll', indSync, { passive: true }); window.addEventListener('resize', indSync); indSync();
+  }
+
   /* ── 기장료 계산 팝업: 업종 5 · 작년 매출 3 · 직원 3 — 누를 때마다 바로 계산(11/4 대표님: 한눈에, 선택지 적게)
      요금 규칙: 업종군 A 도소매(9억/15억) · B 음식·제조·건설·IT(5억/7.5억) · C 서비스·프리랜서(3억/5억) · X 법인 */
   var KK = '<span class="kk"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6c-5 0-9 3.1-9 7 0 2.5 1.7 4.7 4.2 5.9l-.9 3.5c-.1.4.4.7.7.4l4.2-2.8h.8c5 0 9-3.1 9-7s-4-7-9-7z" fill="currentColor"/></svg></span>';
