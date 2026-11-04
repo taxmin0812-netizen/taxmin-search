@@ -241,7 +241,7 @@
   var hcF = $('.hc-frame');
   if (hcF) { var fitHc = function () { hcF.style.setProperty('--k', ((hcF.clientWidth || 358) / 1024).toFixed(4)); }; fitHc(); window.addEventListener('resize', fitHc, { passive: true }); }
 
-  /* ── 업종 사진: 단추 없이 3.2초마다 한 장씩 자동으로 넘김(끝이면 처음으로) · 손가락·마우스를 대면 잠시 멈춤 · 화면 밖·움직임 줄이기면 안 움직임 */
+  /* ── 업종 사진: 단추 없이 2초마다 한 장씩 자동으로 넘김(끝이면 처음으로 · 11/5 대표님 '느려') · 손가락·마우스를 대면 잠시 멈춤 · 화면 밖·움직임 줄이기면 안 움직임 */
   var indA = $('[data-inds]');
   if (indA && !still && IO) {
     var aVis = false, aHold = false, aT = null;
@@ -252,9 +252,9 @@
       var stepW = c0 ? c0.getBoundingClientRect().width + gap : 320;
       var end = indA.scrollLeft + indA.clientWidth >= indA.scrollWidth - 8;
       indA.scrollTo({ left: end ? 0 : indA.scrollLeft + stepW, behavior: 'smooth' });
-    }, 3200);
+    }, 2000);
     var aStop = function () { aHold = true; clearTimeout(aT); };
-    var aGo = function () { clearTimeout(aT); aT = setTimeout(function () { aHold = false; }, 5000); };
+    var aGo = function () { clearTimeout(aT); aT = setTimeout(function () { aHold = false; }, 3000); };
     ['pointerdown', 'mouseenter', 'focusin'].forEach(function (n) { indA.addEventListener(n, aStop); });
     ['pointerup', 'mouseleave', 'focusout'].forEach(function (n) { indA.addEventListener(n, aGo); });
     indA.addEventListener('touchstart', aStop, { passive: true }); indA.addEventListener('touchend', aGo, { passive: true });
