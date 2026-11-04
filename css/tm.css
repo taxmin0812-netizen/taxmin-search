@@ -2055,3 +2055,52 @@ html.tm-off .ld-ic.tel { display: none; }
   .pain h3 { margin-top: 48px; font-size: 26px; line-height: 28px; }
   .pain p { margin-top: 14px; font-size: 18px; line-height: 28px; }
 }
+
+/* ── 18차 = 첫 화면 그림 택스민 고유 짜임(대표님 "웍스를 벤치마킹하되 너무 똑같이 하지마") ───────── */
+/* 규격(판 1024×817 · 틀 자리 · 배율)은 17차 그대로. 판 안: 점 무늬(왼쪽 위) · 연한 파란 면(사진 뒤, 오른쪽·아래로 살짝)
+   · 사진 602×630(오른쪽 x390 y74 · 오른쪽 아래만 크게 둥글게) · 카톡 대화 창(왼쪽 위) · 장부·신고 체크 카드(왼쪽 가운데) · 꼬리표 가격표(오른쪽 위)
+   선 대신 흰 카드 + 부드러운 그림자 · 카톡 노란색은 카톡 표시에만 */
+.hc .ha-dots { position: absolute; left: 0; top: 40px; width: 236px; height: 214px; background-image: radial-gradient(circle, #2554F0 2.6px, transparent 3.2px); background-size: 22px 22px; opacity: .3; }
+.hc .ha-blk { position: absolute; left: 440px; top: 134px; width: 574px; height: 598px; border-radius: 40px 40px 140px 40px; background: linear-gradient(160deg, #DCE6FF 0%, #C2D3FF 100%); }
+.hc .ha-photo { position: absolute; left: 390px; top: 74px; width: 602px; height: 630px; max-width: none; object-fit: cover; object-position: 22% 50%; border-radius: 40px 40px 140px 40px; box-shadow: 0 32px 64px -34px rgba(11, 21, 48, .5); }
+.ha-chat { position: absolute; left: 22px; top: 110px; width: 420px; border-radius: 28px; background: #fff; box-shadow: 0 2px 4px rgba(11, 21, 48, .04), 0 30px 64px -30px rgba(11, 21, 48, .42); overflow: hidden; text-align: left; }
+.ha-ch { display: flex; align-items: center; gap: 14px; padding: 18px 24px 16px; }
+.ha-kk { display: grid; place-items: center; flex: none; width: 52px; height: 52px; border-radius: 50%; background: #FEE500; color: #191919; }
+.ha-kk svg { width: 30px; height: 30px; }
+.ha-ch p { display: grid; margin: 0; }
+.ha-ch b { font-size: 30px; line-height: 36px; font-weight: 800; letter-spacing: -1px; color: #0B1530; }
+.ha-ch span { font-size: 20px; line-height: 26px; letter-spacing: -.4px; color: #6B7684; }
+.ha-cb { display: grid; gap: 12px; padding: 18px 20px 22px; background: #E4EBF7; }
+.ha-b { width: fit-content; margin: 0; padding: 10px 18px; border-radius: 20px; font-size: 25px; line-height: 34px; letter-spacing: -.6px; color: #191F28; white-space: nowrap; }
+.ha-me { justify-self: end; background: #FEE500; border-top-right-radius: 6px; }
+.ha-us { display: grid; grid-template-columns: 46px minmax(0, 1fr); column-gap: 10px; align-items: start; }
+.ha-av { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1px #DCE2EC; }
+.ha-av .ha-sym { width: 32px; height: 19px; }
+.ha-ur { background: #fff; border-top-left-radius: 6px; }
+.ha-todo { position: absolute; left: 40px; top: 430px; width: 470px; padding: 24px 28px 26px; border-radius: 28px; background: #fff; box-shadow: 0 2px 4px rgba(11, 21, 48, .04), 0 30px 64px -30px rgba(11, 21, 48, .42); text-align: left; }
+.ha-th { display: flex; align-items: baseline; justify-content: space-between; margin: 0; }
+.ha-th b { font-size: 30px; line-height: 36px; font-weight: 800; letter-spacing: -1px; color: #0B1530; }
+.ha-th span { font-size: 19px; line-height: 24px; font-weight: 700; letter-spacing: -.4px; color: #2554F0; }
+.ha-todo ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
+.ha-todo li { display: flex; align-items: center; gap: 12px; font-size: 25px; line-height: 30px; letter-spacing: -.5px; color: #191F28; white-space: nowrap; }
+.ha-ck { flex: none; width: 30px; height: 30px; }
+.ha-tag { position: absolute; left: 758px; top: 52px; width: 250px; height: 104px; filter: drop-shadow(0 14px 16px rgba(11, 21, 48, .26)); }
+.ha-tg { position: relative; width: 100%; height: 100%; transform: rotate(6deg); transform-origin: 27px 52px; }
+.ha-tg svg { position: absolute; left: 0; top: 0; width: 250px; height: 104px; max-width: none; overflow: visible; }
+.ha-tg p { position: absolute; left: 52px; top: 0; bottom: 0; display: grid; align-content: center; margin: 0; color: #fff; text-align: left; }
+.ha-tg span { font-size: 18px; line-height: 22px; font-weight: 600; letter-spacing: -.3px; opacity: .85; }
+.ha-tg b { font-size: 46px; line-height: 50px; font-weight: 800; letter-spacing: -1.6px; white-space: nowrap; }
+/* 움직임: 사진 → 대화 창 → 말풍선 차례로 → 장부·신고 카드(체크 그리기) → 가격표. 한 번만 · 살짝 */
+.js-rv .ha-photo, .js-rv .ha-blk, .js-rv .ha-dots { animation: fade-in .8s var(--ease) .1s both; }
+.js-rv .ha-chat { animation: fade-up .6s var(--ease) .3s both; }
+.js-rv .ha-me { animation: fade-up .45s var(--ease) .65s both; }
+.js-rv .ha-av, .js-rv .ha-ur { animation: fade-up .45s var(--ease) .9s both; }
+.js-rv .ha-todo { animation: fade-up .6s var(--ease) .75s both; }
+.js-rv .ha-todo .ha-ck path { stroke-dasharray: 18; stroke-dashoffset: 18; animation: ck-draw .35s var(--ease) forwards; }
+.js-rv .ha-todo li:nth-child(1) .ha-ck path { animation-delay: 1.2s; } .js-rv .ha-todo li:nth-child(2) .ha-ck path { animation-delay: 1.35s; }
+.js-rv .ha-todo li:nth-child(3) .ha-ck path { animation-delay: 1.5s; } .js-rv .ha-todo li:nth-child(4) .ha-ck path { animation-delay: 1.65s; }
+.js-rv .ha-tag { animation: fade-up .55s var(--ease) 1s both; }
+@media (prefers-reduced-motion: reduce) {
+  .js-rv .ha-photo, .js-rv .ha-blk, .js-rv .ha-dots, .js-rv .ha-chat, .js-rv .ha-me, .js-rv .ha-av, .js-rv .ha-ur, .js-rv .ha-todo, .js-rv .ha-tag { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .js-rv .ha-todo .ha-ck path { stroke-dashoffset: 0 !important; animation: none !important; }
+}
