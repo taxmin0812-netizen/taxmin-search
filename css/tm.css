@@ -1911,3 +1911,21 @@ dialog.sheet.rsvdlg.ldlg { width: 100%; max-width: none; height: 100dvh; max-hei
   .ind-t small { font-size: 16px; line-height: 28px; }
   .ind-t b { font-size: 28px; line-height: 40px; }
 }
+
+/* ── 14차 = 기장 문의 단추·여자 사진(대표님 "글씨 아래 선 없애고 색 웹에 맞게 · 여자 이미지 수정") ───────── */
+.ask-btn { padding: 0 80px 0 22px; background: var(--ink); color: #fff; text-decoration: none; }
+.ask-btn:hover { background: #16224A; }
+.ask-btn:visited { color: #fff; }
+.ask-av { position: absolute; right: 6px; bottom: 6px; width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: #DCE6FF; box-shadow: 0 0 0 3px #fff, 0 10px 20px -10px rgba(11, 21, 48, .6); }
+.ask-av img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 8%; }
+.ld-chr { width: 136px; margin: 0 -20px -58px 0; }
+@media (min-width: 960px) {
+  .ask-btn { padding: 0 88px 0 24px; }
+  .ask-av { width: 66px; height: 66px; }
+}
+/* 14차 덧붙임: 단추 얼굴은 원래 사진에서 얼굴 가운데로 · 팝업 띠 사장님 크게(머리~어깨가 카드 위로) */
+.ask-av img { object-position: 50% 50%; }
+.ld-chr { width: 164px; margin: 0 -20px -42px -24px; }
+.ld-t { font-size: 24px; line-height: 34px; }
+@media (min-width: 720px) { .ld-chr { width: 176px; } }
+
