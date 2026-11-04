@@ -815,3 +815,49 @@ dialog.sheet::backdrop { background: rgba(11, 21, 48, .55); }
   .hd .hd-calc svg { display: none; }
   .hd .hd-calc { margin-right: 4px; }
 }
+
+/* ── 7차: 꾸밈 상자 걷어 내기(대표님 11/4 "네모박스 좀 빼") — 여백·가는 줄·글자로 나눔. 버튼·팝업·예약 칸·시연 휴대폰·안심 판만 상자 */
+/* 첫 화면 '기장료에 포함': 체크 + 글자 */
+.hincl ul { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 16px; }
+.hincl li { padding: 2px 0; border-radius: 0; background: none; box-shadow: none; font-size: 15px; }
+/* 하는 일: 흰 카드 없이 그림 → 제목 → 설명 */
+.feats .feat { background: none; box-shadow: none; border-radius: 0; overflow: visible; }
+.feats .feat .feat-pic { order: 0; margin: 0; border-radius: var(--r); }
+.feats .feat h3 { order: 1; margin: 18px 0 0; padding: 0; }
+.feats .feat p { order: 2; margin: 8px 0 0; padding: 0; }
+/* 포함/별도: 상자 없이 가는 줄 */
+.incl-box { padding: 0; border-radius: 0; background: none; box-shadow: none; margin: 32px 0 40px; }
+.ib-x { padding: 16px 0 0; border-radius: 0; background: none; border-top: 1px solid #D5DEEE; }
+/* 기장료 계산 판: 큰 흰 상자·가격 상자·업종 판 없이 */
+.calc-cta { padding: 0; border-radius: 0; background: none; box-shadow: none; }
+.cc-price { border-top: 1px solid var(--line); }
+.cc-price li, .cc-price li:first-child { padding: 14px 2px; border-radius: 0; background: none; box-shadow: none; border-bottom: 1px solid var(--line); }
+.cc-pick { padding: 0; border-radius: 0; background: none; }
+.cc-inds button { border-radius: 999px; background: var(--paper); box-shadow: inset 0 0 0 1px #D3D8E0; }
+.cc-inds button:hover { box-shadow: inset 0 0 0 1.5px var(--b); }
+/* 시작 3단계: 진한 판 위에 번호 + 글자 */
+.steps li { padding: 0 0 0 46px; border-radius: 0; background: none; color: #fff; }
+.steps .st-n { left: 0; top: 0; background: #fff; color: var(--b-d); }
+.steps h3 { margin-top: 2px; color: #fff; }
+.steps p { color: rgba(255, 255, 255, .86); }
+/* 카톡 판·예시 대화: 상자 없이 */
+.talk-kk { padding: 0; border-radius: 0; background: none; }
+.talk-ui { padding: 0; border-radius: 0; background: none; }
+.rsv { box-shadow: inset 0 0 0 1px var(--line); }
+/* 업종 흐름띠: 아이콘 + 글자 */
+.mchip { padding: 8px 18px 8px 0; background: none; box-shadow: none; }
+/* 마무리 숫자: 상자 없이 줄로 */
+.stats { padding: 0; border-radius: 0; background: none; box-shadow: none; }
+@media (min-width: 720px) {
+  .ib-x { padding: 0 0 0 24px; border-top: 0; border-left: 1px solid #D5DEEE; }
+  .steps { gap: 32px; }
+  .feats .feat:not(.feat-big) { column-gap: 32px; }
+}
+@media (min-width: 960px) {
+  .feats .feat-big { column-gap: 56px; }
+  .feats .feat-big .feat-pic { border-radius: var(--r); }
+  .stats .stat:first-child { padding-left: 0; }
+}
+@media (min-width: 1024px) {
+  .hincl ul { justify-content: flex-start; }
+}
