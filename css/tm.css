@@ -2947,3 +2947,8 @@ html.tm-off [data-page="apply"] .ap-bar-tt, html.tm-off .ap-bar-tel .ap-bar-tt {
   .ap-trust { font-size: 15px; }
   .ap-plan-c { text-align: center; font-size: 15px; }
 }
+
+/* ── 23차-b 상자 빼기: 밤 안내는 상자 없이 한 줄 · '이런 사장님께 맞아요' 번호 칸도 상자 없이 ── */
+.ap-off { padding: 0; border-radius: 0; background: none; color: rgba(255, 255, 255, .85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ap-fit-l li { padding: 0; border-radius: 0; background: none; }
+@media (max-width: 379px) { .ap-off { font-size: 12px; letter-spacing: -0.03em; } }
