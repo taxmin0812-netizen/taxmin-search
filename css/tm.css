@@ -2180,3 +2180,468 @@ html.tm-off .ld-ic.tel { display: none; }
 .hc .hc-eff { top: 470px; }
 .hc .hc-card { top: 520px; }
 .hc .hc-price { top: 548px; }
+
+/* ── 22차 = 첫 화면 아래 칸 크기 줄이기(대표님 "업종·설명이 큼직큼직 — 규격 줄이기") ───────── */
+/* 기준 = 첫 화면(그대로): 제목 PC 48 · 휴대폰 32 → 칸 제목은 한 단계 아래(4:3) PC 36 · 휴대폰 24
+   카드 제목 PC 22~24 · 휴대폰 18~20 · 본문 PC 16~17 · 휴대폰 15~16(15 밑으로 새로 줄인 글 없음) · 그림·사진은 비율 그대로 작게
+   칸 사이 PC 140~160 → 96(색 띠 안 56~80) · 휴대폰 50~100 → 40~64 · 누르는 곳 모두 44 이상(질문 줄 56·64 · 기장료 칸 92·114 · 버튼 50 그대로)
+   손대지 않음: 첫 화면(.hero·.hc*) · 머리줄 · 문의 창·계산 창 · 기장 문의 단추 · 문구
+   아래 휴대폰 값(같은 세기·뒤에 있음)이 앞 회차 PC 규칙도 덮으므로 PC 값은 맨 아래 960px 묶음에서 다시 정함 — 블록은 통째로 붙일 것 */
+
+/* 1. 칸 제목·칸 설명 */
+.pain-sec .big, .feat-sec .big, .flow-txt .big, .inds-h .big, .calc-sec .big, .faq-sec .big, .closing .big { font-size: 24px; line-height: 34px; }
+.flow-txt .lede, .calc-head .lede { margin-top: 12px; font-size: 15px; line-height: 24px; }
+
+/* 2. 칸 사이 여백 */
+#pain { padding-top: 40px; }
+#why { padding-top: 48px; }
+#flow { margin-top: 48px; padding: 44px 0; }
+#inds { padding: 48px 0; }
+#calc { padding-top: 48px; }
+#faq { padding: 48px 0; }
+.closing { padding-block: 64px; }
+
+/* 3. 고민 카드: 휴대폰·태블릿은 아이콘 왼쪽 + 글 오른쪽(카드 266 → 약 116) */
+.pains { gap: 12px; margin-top: 24px; }
+.pain { display: grid; grid-template-columns: 56px minmax(0, 1fr); column-gap: 16px; align-items: start; padding: 20px 20px 22px; }
+.pain .pi { grid-row: 1 / span 2; width: 56px; height: 56px; }
+.pain h3 { margin-top: 0; font-size: 18px; line-height: 26px; }
+.pain p { margin-top: 4px; font-size: 15px; line-height: 22px; text-wrap: pretty; }
+
+/* 4. 하는 일 3줄: 휴대폰 그림 358 → 280(가운데) · 제목 22 → 20 · 첫 줄 18 → 16 · 체크 목록 16 → 15 */
+.feats2 { gap: 40px; margin-top: 24px; }
+.ft2 { gap: 12px; }
+.ft2-pic { justify-self: center; width: min(100%, 280px); }
+.ft2 h3 { font-size: 20px; line-height: 28px; }
+.ft2-l { margin-top: 6px; font-size: 16px; line-height: 26px; text-wrap: pretty; }
+.ck-list { margin-top: 12px; gap: 8px; }
+.ck-list li { grid-template-columns: 20px minmax(0, 1fr); column-gap: 8px; font-size: 15px; line-height: 24px; text-wrap: pretty; }
+.ck-list svg { width: 18px; height: 18px; }
+
+/* 5. 하나로 이어져요: 휴대폰 원 그림 크기·둘레 글은 그대로(더 줄이면 읽히지 않음) · '노무·법무' 동그라미만 52 → 44(좁은 휴대폰에서 '부가세·소득세 신고' 글에 닿던 것) */
+.flow { gap: 24px; }
+.fp-ic { width: 44px; height: 44px; }
+.fp-ic img { width: 30px; height: 30px; }
+
+/* 6. 업종 사진(짙은 띠): 카드 300×480 → 272×377(사진 비율 888:1232 그대로 — 좌우가 덜 잘림) · 누적 고객 48 → 40 */
+.inds-h { margin-bottom: 24px; }
+.inds-sec .proof-n { font-size: 40px; line-height: 48px; letter-spacing: -1.5px; }
+.inds-sec .proof-n sup { font-size: 16px; }
+.inds-track { gap: 12px; }
+.ind-card { width: 272px; height: auto; aspect-ratio: 888 / 1232; }
+.ind-t { left: 20px; right: 16px; bottom: 22px; }
+.ind-t small { font-size: 15px; line-height: 22px; }
+.ind-t b { margin-top: 2px; font-size: 18px; line-height: 26px; }
+
+/* 7. 기장료 큰 숫자 38 → 32 · '만원~'이 줄 높이를 늘리지 않게 */
+.calc-head { margin-bottom: 24px; }
+.pstats { gap: 24px 16px; }
+.pst-n { font-size: 32px; line-height: 38px; letter-spacing: -1px; }
+.pst-n small { font-size: 18px; line-height: 1; }
+.pst b { margin-top: 10px; }
+.calc-fine { margin-top: 24px; }
+
+/* 8. 자주 묻는 질문(줄 높이 68 → 56 — 누르는 곳 44 이상 · 끝말 홀로 남지 않게) */
+.faq-sec .big { margin-bottom: 24px; }
+.faq summary { padding: 16px 4px; font-size: 16px; line-height: 24px; text-wrap: pretty; }
+
+/* 9. 마무리 띠 */
+.closing .cta { margin-top: 28px; }
+.closing .fine { margin-top: 16px; }
+
+/* 태블릿 이상(720px~): 하는 일 3줄을 그림 + 글 두 칸으로(그림은 번갈아 왼쪽·오른쪽) — 태블릿에서 그림이 화면 폭 가득(768×576)이던 것 */
+@media (min-width: 720px) {
+  .ft2 { grid-template-columns: minmax(0, 280px) minmax(0, 1fr); gap: 0 40px; }
+  .ft2.rev { grid-template-columns: minmax(0, 1fr) minmax(0, 280px); }
+  .ft2.rev .ft2-pic { order: 2; }
+  .ft2-pic { justify-self: stretch; width: auto; }
+}
+
+/* PC(960px~) */
+@media (min-width: 960px) {
+  /* 칸 제목 42~44 → 36 · 칸 설명 18 → 17 */
+  .pain-sec .big, .feat-sec .big, .flow-txt .big, .inds-h .big, .calc-sec .big, .faq-sec .big, .closing .big { font-size: 36px; line-height: 48px; }
+  .flow-txt .lede, .calc-head .lede { margin-top: 16px; font-size: 17px; line-height: 28px; }
+  /* 칸 사이 140~160 → 96 · 색 띠 안 56~80 */
+  #pain { padding-top: 96px; }
+  #why { padding-top: 96px; }
+  #flow { margin-top: 96px; padding: 56px 0; }
+  #inds { padding: 72px 0; }
+  #calc { padding: 96px 0 80px; }
+  #faq { padding: 0 0 96px; }
+  .closing { padding-block: 80px; }
+  /* 고민 카드 413×316 → 약 415×232: 아이콘 98 → 64 · 제목 26 → 22 · 설명 18 → 16 */
+  .pains { gap: 20px; margin-top: 36px; }
+  .pain { display: block; padding: 28px 32px 30px; }
+  .pain .pi { width: 64px; height: 64px; }
+  .pain h3 { margin-top: 20px; font-size: 22px; line-height: 30px; }
+  .pain p { margin-top: 8px; font-size: 16px; line-height: 26px; }
+  /* 하는 일 3줄: 그림 634×476 → 336×252(줄 높이 476 → 252) · 제목 36 → 24 · 첫 줄 20 → 17 */
+  .feats2 { gap: 48px; margin-top: 36px; }
+  .ft2 { grid-template-columns: minmax(0, 336px) minmax(0, 1fr); gap: 0 64px; }
+  .ft2.rev { grid-template-columns: minmax(0, 1fr) minmax(0, 336px); }
+  .ft2 h3 { font-size: 24px; line-height: 34px; }
+  .ft2-l { margin-top: 8px; font-size: 17px; line-height: 28px; }
+  .ck-list { margin-top: 16px; gap: 8px; }
+  .ck-list li { grid-template-columns: 22px minmax(0, 1fr); column-gap: 10px; font-size: 16px; line-height: 26px; }
+  .ck-list svg { width: 20px; height: 20px; }
+  /* 하나로 이어져요: 원 그림 550 → 440(둘레 칸도 함께 — '부가세·소득세 신고'와 '노무·법무' 동그라미가 닿지 않게) */
+  .flow { gap: 48px; }
+  .flow-dia { width: min(100%, 440px); }
+  .fn { width: 100px; }
+  .fn img { width: 40px; height: 40px; }
+  .fp-ic { width: 60px; height: 60px; }
+  .fp-ic img { width: 40px; height: 40px; }
+  .fn-plus b { font-size: 14px; }
+  .flow-core .sym { width: 60px; }
+  .flow-core b { font-size: 15px; }
+  /* 업종 사진: 카드 446×620 → 360×500(사진 비율) · 넘김 한 칸 476 → 380 · 어느 폭에서나 다음 카드가 보임 · 누적 고객 72 → 56 */
+  .inds-h { margin-bottom: 36px; }
+  .inds-sec .proof-l { font-size: 16px; line-height: 24px; }
+  .inds-sec .proof-n { font-size: 56px; line-height: 64px; letter-spacing: -2px; }
+  .inds-sec .proof-n sup { font-size: 20px; }
+  .inds-track { gap: 20px; }
+  .ind-card { width: 360px; }
+  .ind-t { left: 28px; right: 20px; bottom: 30px; }
+  .ind-t small { font-size: 15px; line-height: 22px; }
+  .ind-t b { margin-top: 4px; font-size: 22px; line-height: 30px; }
+  .inds-foot { margin-top: 16px; }
+  /* 기장료: 큰 숫자 64 → 44(960~1279 폭의 48 규칙도 함께 덮음) · 업종 20 → 18 · 매출 구간 16 → 15 */
+  .calc-head { margin-bottom: 36px; }
+  .pstats { gap: 0 24px; }
+  .pst-n { font-size: 44px; line-height: 52px; letter-spacing: -1.5px; }
+  .pst-n small { font-size: 22px; }
+  .pst b { margin-top: 12px; font-size: 18px; line-height: 26px; }
+  .pst-s { font-size: 15px; line-height: 22px; }
+  .calc-fine { margin-top: 28px; font-size: 15px; line-height: 24px; }
+  /* 자주 묻는 질문: 질문 20 → 18(줄 높이 70 → 64) */
+  .faq-sec .big { margin-bottom: 36px; }
+  .faq summary { padding: 18px 4px; font-size: 18px; line-height: 28px; }
+  /* 마무리 띠: 제목 44 → 36 · 버튼 글 18 → 16(첫 화면 버튼과 같게, 높이 50 그대로) */
+  .closing .cta { margin-top: 32px; }
+  .closing .cta .btn { font-size: 16px; }
+}
+
+/* ── 22차 = 상담 신청 전용 페이지(apply.html) ── */
+/* site/apply.html · body[data-page="apply"] — 모든 규칙은 .ap-* 또는 [data-page="apply"] 로 묶여 메인(index.html)에는 영향 없음.
+   첫 화면 = 신청 카드(휴대폰: 제목·조건 바로 아래 / PC: 오른쪽 440 · 높이 600 이상이면 따라옴)
+   아래 칸 = 포함 · 업종 · 시작 순서 · 질문 → 파란 마무리 띠 → 바닥글(메인 footer 그대로)
+   늘 떠 있는 막대 = 휴대폰·태블릿(번호 칸이 화면 위로 지나간 뒤에만) · PC 는 높이 600 미만일 때만 알약 막대 */
+[data-page="apply"] { background: #fff; }
+
+/* 머리줄: 로고 + 전화 + 카톡(메뉴·기장료 계산 없음) · PC 는 글 시작선을 내용 폭에 맞춤 · 내리면 아래 가는 줄(전체 폭) */
+.ap-hd.on { box-shadow: 0 1px 0 #E5E8EB; }
+.ap-hd .bar, .ap-hd.on .bar { max-width: 1120px; height: 62px; margin: 0 auto; padding: 0 16px; background: #fff; box-shadow: none; }
+.ap-hd nav { flex: none; display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.ap-hd .btn-sm { padding: 0 13px; font-size: 15px; }
+.ap-hd-tel { width: 44px; padding: 0 !important; }
+.ap-hd-tel svg { width: 19px; height: 19px; }
+.ap-hd-tel .ap-tt { display: none; }
+.ap-hd-tel.off { width: auto; padding: 0 12px !important; }
+.ap-hd-tel.off .ap-tt { display: inline; }
+@media (max-width: 359px) { .ap-hd-tel { display: none !important; } }
+@media (min-width: 1024px) {
+  .ap-hd .bar, .ap-hd.on .bar { height: 65px; padding: 0 40px; }
+  .ap-hd nav { gap: 10px; }
+  .ap-hd-tel, .ap-hd-tel.off { width: auto; padding: 0 15px !important; }
+  .ap-hd-tel .ap-tt { display: inline; }
+}
+
+/* 바탕: 첫 화면만 옅은 회청색 → 흰색(신청 카드가 떠 보이게) */
+.ap-main { background: linear-gradient(180deg, #F1F4FA 0, #F4F7FB 280px, #FFFFFF 600px); }
+.ap-grid { display: grid; grid-template-columns: minmax(0, 1fr); max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 720px) and (max-width: 1023px) { .ap-grid { max-width: 672px; } }
+@media (min-width: 1024px) {
+  .ap-main { background: linear-gradient(180deg, #F1F4FA 0, #F4F7FB 360px, #FFFFFF 760px); }
+  .ap-grid { grid-template-columns: minmax(0, 1fr) 440px; column-gap: 56px; padding: 0 40px; }
+  .ap-hero, .ap-sec { grid-column: 1; }
+  .ap-side { grid-column: 2; grid-row: 1 / span 5; }
+}
+@media (min-width: 1200px) { .ap-grid { column-gap: 72px; } }
+
+/* ① 첫 화면 글(휴대폰은 머리말·제목·조건만 · PC 는 체크 3줄과 누적 고객까지) */
+.ap-hero { padding: 14px 0 12px; }
+.ap-eb { margin: 0; font-size: 14px; line-height: 20px; font-weight: 700; letter-spacing: -.4px; color: var(--b-d); }
+.ap-hero h1 { margin: 4px 0 0; font-size: 30px; line-height: 38px; font-weight: 800; letter-spacing: -1.2px; color: var(--ink); }
+.ap-hero h1 em { font-style: normal; color: var(--b); }
+.ap-vat { display: inline-block; margin-left: 2px; padding: 0 7px; border-radius: 6px; background: var(--b-t); color: var(--b-d); font-size: 13px; line-height: 24px; font-weight: 700; letter-spacing: -.3px; vertical-align: 4px; white-space: nowrap; }
+.ap-cond { margin: 6px 0 0; font-size: 13px; line-height: 19px; letter-spacing: -.35px; color: var(--sub); }
+.ap-facts, .ap-hero .ap-proof-h, .ap-hero .ap-proof-n { display: none; }
+@media (min-width: 1024px) {
+  .ap-hero { padding: 64px 0 0; }
+  .ap-eb { font-size: 18px; line-height: 26px; letter-spacing: -.5px; }
+  .ap-hero h1 { margin-top: 12px; font-size: 48px; line-height: 60px; letter-spacing: -2px; }
+  .ap-vat { margin-left: 4px; padding: 0 10px; font-size: 16px; line-height: 30px; vertical-align: 9px; }
+  .ap-cond { margin-top: 16px; max-width: 34em; font-size: 16px; line-height: 26px; }
+  .ap-facts { display: grid; gap: 10px; margin: 28px 0 0; padding: 0; list-style: none; }
+  .ap-facts li { display: flex; align-items: center; gap: 10px; font-size: 17px; line-height: 26px; font-weight: 600; letter-spacing: -.4px; color: var(--ink-2); }
+  .ap-facts svg { flex: none; width: 22px; height: 22px; color: var(--b); }
+  .ap-hero .ap-proof-h { display: flex; flex-direction: row; align-items: baseline; gap: 10px; margin: 30px 0 0; }
+  .ap-hero .ap-proof-h b { font-size: 34px; line-height: 40px; }
+  .ap-hero .ap-proof-n { display: block; margin: 4px 0 0; font-size: 12.5px; line-height: 19px; letter-spacing: -.3px; color: #6B7684; }
+}
+
+/* 신청 카드 */
+.ap-side { position: relative; }
+.ap-card { position: relative; padding: 16px; border-radius: 20px; background: #fff; box-shadow: 0 0 0 1px #E3E8F0, 0 20px 44px -24px rgba(11, 21, 48, .38); scroll-margin-top: 0; }   /* html 의 scroll-padding-top 84 로 머리줄 아래 22 에 섬 */
+.ap-card:focus { outline: none; }
+.ap-card.ping { animation: ap-ping .9s var(--ease) 1; }
+@keyframes ap-ping { 0% { box-shadow: 0 0 0 1px #E3E8F0, 0 0 0 0 rgba(37, 84, 240, .45); } 100% { box-shadow: 0 0 0 1px #E3E8F0, 0 0 0 14px rgba(37, 84, 240, 0); } }
+.ap-t { margin: 0; font-size: 18px; line-height: 24px; font-weight: 800; letter-spacing: -.7px; color: var(--ink); }
+.ap-card.is-done .ap-t { display: none; }
+.ap-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: 12px; }
+.ap-form[hidden] { display: none; }
+/* 번호 칸: 칸 안 왼쪽 이름표 + 세로 줄 · 글자 19(아이폰 확대 안 됨) */
+.ap-tel { display: flex; align-items: center; min-height: 54px; border-radius: 12px; background: #F7F9FC; box-shadow: inset 0 0 0 1px #D9DFEA; cursor: text; }
+.ap-tel > span { flex: none; padding: 0 12px 0 14px; border-right: 1px solid #D9DFEA; font-size: 14px; line-height: 22px; font-weight: 700; letter-spacing: -.4px; color: var(--ink-2); }
+.ap-tel input { flex: 1; min-width: 0; width: 100%; height: 54px; padding: 0 14px; border: 0; border-radius: 0 12px 12px 0; background: transparent; font: inherit; font-size: 19px; font-weight: 600; letter-spacing: .2px; color: var(--ink); }
+.ap-tel input::placeholder { font-size: 16px; font-weight: 400; letter-spacing: -.3px; color: #8B95A1; }
+.ap-tel input:focus { outline: none; }
+.ap-tel:focus-within { background: #fff; box-shadow: inset 0 0 0 2px var(--b); }
+.ap-tel.bad { box-shadow: inset 0 0 0 2px var(--err); }
+/* 업종·작년 매출 칩(진짜 라디오 · 화살표 키로 고름) */
+.ap-ind, .ap-rev { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.ap-ind[hidden], .ap-rev[hidden] { display: none; }
+.ap-l { margin-right: 2px; font-size: 14px; line-height: 20px; font-weight: 700; letter-spacing: -.4px; color: var(--ink-2); white-space: nowrap; }
+.ap-l small { font-size: 12px; font-weight: 500; color: var(--mute); }
+.ap-chip { position: relative; display: inline-grid; }
+.ap-chip input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.ap-chip span { display: grid; place-items: center; min-height: 40px; padding: 0 12px; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #D3D9E3; font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: -.45px; color: #202124; white-space: nowrap; transition: background-color .15s, box-shadow .15s, color .15s; }
+.ap-chip:hover span { box-shadow: inset 0 0 0 1.5px var(--b); }
+.ap-chip input:checked + span { background: var(--b-t); color: var(--b-d); box-shadow: inset 0 0 0 2px var(--b); font-weight: 700; }
+.ap-chip input:focus-visible + span { outline: 3px solid var(--b); outline-offset: 2px; }
+.ap-rev .ap-chip span { min-height: 36px; padding: 0 10px; font-size: 13.5px; }
+/* 업종 칩 + (고른 뒤) 작년 매출 칩·안내: 한 덩어리 — 안내 칸(aria-live)은 늘 자리에 있고, 빈 때는 높이 0 */
+.ap-q { display: grid; }
+.ap-live > * { margin-top: 8px; }
+.ap-live > .ap-rmsg { margin-top: 6px; }
+/* 작년 매출을 고르면 한 줄 · 법인은 두 줄 안내(가격 옆 조건 함께) */
+.ap-rmsg { margin: 0; font-size: 12.5px; line-height: 18px; font-weight: 600; letter-spacing: -.35px; color: var(--b-d); }
+.ap-corp { margin: 0; padding: 8px 10px; border-radius: 10px; background: #F2F6FF; font-size: 13px; line-height: 19px; letter-spacing: -.35px; color: var(--ink-2); }
+.ap-corp b { font-weight: 700; color: var(--b-d); }
+/* 동의 두 줄: 줄마다 누르는 높이 44 · '보기'는 알약(누르는 칸 44×48) */
+.ap-agree { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 44px; }
+.ap-agree ~ .ap-agree { margin-top: -10px; }
+.ap-ck { flex: 1; display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; line-height: 20px; letter-spacing: -.4px; color: #4E5968; cursor: pointer; }
+.ap-ck input { flex: none; width: 22px; height: 22px; margin: 0; accent-color: var(--b); }
+.ap-ck b { font-weight: 700; color: var(--b-d); }
+.ap-more { flex: none; display: grid; place-items: center; min-width: 48px; min-height: 44px; margin-right: -4px; padding: 0 4px; border: 0; background: none; font: inherit; cursor: pointer; }
+.ap-more-t { display: grid; place-items: center; height: 30px; padding: 0 10px; border: 1px solid #C9D0DA; border-radius: 8px; background: #fff; font-size: 13px; line-height: 1; font-weight: 700; color: #4E5968; }
+.ap-terms { margin-top: -8px; padding: 10px 12px; border-radius: 10px; background: #F5F7FA; }
+.ap-terms p { margin: 0; font-size: 12.5px; line-height: 19px; letter-spacing: -.3px; color: #5F6B7A; }
+.ap-terms a { color: var(--b); }
+.ap-form .msg { min-height: 0; margin: 0; font-size: 14px; line-height: 20px; }
+.ap-form .msg:empty { display: none; }
+.ap-go { width: 100%; min-height: 54px; border-radius: 12px; background: var(--b); color: #fff; font-size: 18px; font-weight: 800; letter-spacing: -.4px; }
+.ap-go:hover { background: var(--b-d); }
+.ap-go:disabled { cursor: default; opacity: .75; }
+/* 신청 버튼 아래 한 줄(낮·밤) */
+.ap-note { margin: -2px 0 0; font-size: 12.5px; line-height: 18px; letter-spacing: -.3px; color: #6B7684; }
+.ap-note .ap-off { display: none; }
+.tm-off .ap-note .ap-on { display: none; }
+.tm-off .ap-note .ap-off { display: inline; font-weight: 700; color: var(--b-d); }
+/* 카드 아래 카톡·전화 */
+.ap-alt { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #EDF0F4; }
+.ap-alt .btn { min-height: 46px; padding: 0 10px; border-radius: 10px; font-size: 15px; }
+.ap-alt .btn svg { width: 18px; height: 18px; }
+.ap-alt .kk { width: 22px; height: 22px; }
+.ap-card.is-done .ap-alt { display: none; }
+/* 접수 뒤 */
+.ap-done { display: grid; justify-items: start; gap: 8px; padding: 4px 0 2px; }
+.ap-done[hidden] { display: none; }
+.ap-done:focus { outline: none; }
+.ap-done .ok { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--b); color: #fff; }
+.ap-done .ok svg { width: 24px; height: 24px; }
+.ap-done h3 { margin: 6px 0 0; font-size: 22px; line-height: 30px; font-weight: 800; letter-spacing: -.8px; }
+.ap-done p { margin: 0; font-size: 15px; line-height: 23px; letter-spacing: -.4px; color: var(--ink-2); }
+.ap-done .btn { width: 100%; margin-top: 8px; min-height: 50px; font-size: 16px; }
+.ap-redo { min-height: 44px; padding: 0; border: 0; background: none; font: inherit; font-size: 13.5px; color: var(--sub); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+@media (max-width: 374px) { .ap-t { font-size: 17px; letter-spacing: -.8px; } }
+/* 키 작은 휴대폰(높이 600 이하 · 아이폰 SE 사파리 375×553 등): 머리말 줄을 숨기고 간격을 줄여 [상담 신청하기]까지 첫 화면에 */
+@media (max-width: 719px) and (max-height: 600px) {
+  .ap-eb { display: none; }
+  .ap-hero { padding-top: 10px; }
+  .ap-hero h1 { margin-top: 0; font-size: 28px; line-height: 35px; }
+  .ap-form { gap: 8px; margin-top: 10px; }
+  .ap-agree ~ .ap-agree { margin-top: -8px; }
+  .ap-chip span { min-height: 38px; }
+}
+/* 태블릿(720~1023): 휴대폰 짜임 그대로 · 머리줄 글 시작선을 내용 폭(640)에 맞추고 첫 화면 글만 조금 크게 */
+@media (min-width: 720px) and (max-width: 1023px) {
+  .ap-hd .bar, .ap-hd.on .bar { max-width: 672px; }
+  .ap-eb { font-size: 15px; line-height: 22px; }
+  .ap-hero h1 { font-size: 34px; line-height: 44px; }
+  .ap-cond { max-width: 34em; font-size: 14px; line-height: 21px; }
+}
+@media (min-width: 1024px) {
+  .ap-side { padding-top: 64px; }
+  .ap-card { padding: 24px 24px 22px; }
+  .ap-t { font-size: 22px; line-height: 30px; letter-spacing: -.8px; }
+  .ap-form { gap: 12px; margin-top: 16px; }
+  .ap-tel { min-height: 56px; }
+  .ap-tel input { height: 56px; }
+  .ap-agree ~ .ap-agree { margin-top: -12px; }
+  .ap-go { min-height: 56px; }
+  .ap-note { font-size: 13px; line-height: 19px; }
+  .ap-terms { max-height: 150px; overflow: auto; }
+}
+/* PC: 신청 카드가 오른쪽에 붙어 따라옴(높이 600 이상) · 카드가 화면보다 길어지면 카드 안에서만 넘김 */
+@media (min-width: 1024px) and (min-height: 600px) {
+  .ap-card { position: sticky; top: 89px; max-height: calc(100vh - 105px); overflow-y: auto; }
+}
+/* 키 낮은 PC(높이 600~759, 흔한 노트북 1366×650·1536×730): 카드를 간단히 — 카톡·전화 줄은 머리줄에 있으니 숨기고 간격만 줄임 */
+@media (min-width: 1024px) and (max-height: 759px) {
+  .ap-side { padding-top: 40px; }
+  .ap-hero { padding-top: 40px; }
+  .ap-card { padding: 20px 22px 18px; }
+  .ap-form { gap: 10px; margin-top: 12px; }
+  .ap-alt { display: none; }
+}
+
+/* 아래 칸 공통(메인보다 작게: 칸 제목 휴대폰 22 · PC 30) */
+.ap-sec { padding: 44px 0 0; }
+.ap-h2 { margin: 0; text-wrap: balance; font-size: 22px; line-height: 30px; font-weight: 800; letter-spacing: -.8px; color: var(--ink); }
+.ap-fine { margin: 12px 0 0; font-size: 12.5px; line-height: 19px; letter-spacing: -.3px; color: #6B7684; }
+.ap-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 18px; margin-top: 20px; }
+.ap-jump { min-height: 52px; padding: 0 22px; border-radius: 10px; background: var(--b); color: #fff; font-size: 16px; font-weight: 800; }
+.ap-jump:hover { background: var(--b-d); }
+.ap-link { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; font-size: 15px; font-weight: 700; letter-spacing: -.4px; color: var(--ink-2); text-decoration: none; }
+.ap-link .kk { width: 22px; height: 22px; }
+.ap-link .kk svg { width: 12px; height: 12px; }
+.ap-grid > .ap-sec:last-child { padding-bottom: 56px; }
+@media (min-width: 1024px) {
+  .ap-sec { padding-top: 88px; }
+  .ap-h2 { font-size: 30px; line-height: 40px; letter-spacing: -1.1px; }
+  .ap-h2 br { display: none; }
+  .ap-fine { font-size: 13px; line-height: 20px; }
+  .ap-grid > .ap-sec:last-child { padding-bottom: 96px; }
+}
+
+/* ② 포함: 아이콘 + 한 줄(상자 없이 가는 줄로 나눔) + 따로·달라질 때·연결 꼬리표 */
+.ap-list { margin: 16px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.ap-list li { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.ap-list img { width: 44px; height: 44px; }
+.ap-list b { display: block; font-size: 16px; line-height: 22px; font-weight: 700; letter-spacing: -.5px; color: var(--ink); }
+.ap-list p { margin: 2px 0 0; font-size: 14px; line-height: 20px; letter-spacing: -.35px; color: var(--sub); }
+.ap-tags { display: grid; gap: 8px; margin: 14px 0 0; }
+.ap-tag { margin: 0; font-size: 13.5px; line-height: 20px; letter-spacing: -.35px; color: var(--sub); }
+.ap-tag i { display: inline-block; margin-right: 6px; padding: 0 7px; border-radius: 6px; background: #EEF0F4; font-style: normal; font-size: 12px; line-height: 20px; font-weight: 700; color: var(--ink-2); vertical-align: 1px; }
+@media (min-width: 1024px) {
+  .ap-list li { grid-template-columns: 52px minmax(0, 1fr); column-gap: 16px; padding: 16px 0; }
+  .ap-list img { width: 52px; height: 52px; }
+  .ap-list b { font-size: 18px; line-height: 26px; }
+  .ap-list p { font-size: 15.5px; line-height: 24px; }
+  .ap-tags { gap: 10px; margin-top: 18px; }
+  .ap-tag { font-size: 15px; line-height: 23px; }
+}
+
+/* ③ 업종: 누르면 신청 칸에 담김(자동 넘김·화살표 없음) */
+.ap-pick-h { display: grid; gap: 6px; }
+.ap-proof { margin: 0; display: flex; align-items: baseline; gap: 8px; }
+.ap-proof span { font-size: 14px; font-weight: 700; letter-spacing: -.4px; color: var(--sub); }
+.ap-proof b { font-size: 30px; line-height: 36px; font-weight: 800; letter-spacing: -1.2px; color: var(--b); }
+.ap-proof sup { margin-left: 1px; font-size: 14px; font-weight: 700; color: #8B95A1; }
+.ap-lead { margin: 8px 0 0; font-size: 14px; line-height: 21px; letter-spacing: -.35px; color: var(--ink-2); }
+.ap-tiles { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin: 16px 0 0; }
+.ap-tile { display: grid; grid-template-columns: 72px minmax(0, 1fr); column-gap: 14px; align-items: center; width: 100%; margin: 0; padding: 8px 12px 8px 8px; border: 0; border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1px #E1E6EE; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.ap-tile:hover { box-shadow: inset 0 0 0 2px var(--b); }
+.ap-tile > img, .ap-tile .ic { width: 72px; height: 88px; border-radius: 10px; }
+.ap-tile > img { object-fit: cover; object-position: 50% 26%; }
+.ap-tile .ic { display: grid; place-items: center; background: var(--b-t); }
+.ap-tile .ic img { width: 50px; height: 50px; }
+.ap-tile.etc .ic { background: #F2F4F6; }
+.ap-tile b { display: block; font-size: 16px; line-height: 22px; font-weight: 800; letter-spacing: -.5px; color: var(--ink); }
+.ap-tile small { display: block; margin-top: 2px; font-size: 13px; line-height: 19px; letter-spacing: -.35px; color: var(--sub); }
+.ap-tile em { display: block; margin-top: 4px; font-style: normal; font-size: 13px; line-height: 19px; font-weight: 700; letter-spacing: -.35px; color: var(--b-d); }
+@media (min-width: 1024px) {
+  .ap-pick-h { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+  .ap-proof { flex-direction: column; align-items: flex-end; gap: 0; }
+  .ap-proof b { font-size: 42px; line-height: 48px; }
+  .ap-lead { font-size: 16px; line-height: 24px; }
+  .ap-tiles { gap: 10px; margin-top: 20px; }
+  .ap-tile b { font-size: 17px; line-height: 24px; }
+  .ap-tile small, .ap-tile em { font-size: 13.5px; line-height: 20px; }
+}
+@media (min-width: 1200px) {
+  .ap-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ap-tile { grid-template-columns: 80px minmax(0, 1fr); }
+  .ap-tile > img, .ap-tile .ic { width: 80px; height: 100px; }
+}
+
+/* ④ 시작 순서: 번호 + 점선(상자 없음) */
+.ap-steps { margin: 18px 0 0; padding: 0; list-style: none; counter-reset: ap; }
+.ap-steps li { position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr); column-gap: 12px; padding-bottom: 18px; }
+.ap-steps li::before { counter-increment: ap; content: "0" counter(ap); display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 2px var(--b); font-size: 13px; font-weight: 800; color: var(--b); }
+.ap-steps li:not(:last-child)::after { content: ""; position: absolute; left: 17px; top: 42px; bottom: 6px; border-left: 2px dotted var(--b-l); }
+.ap-steps b { display: block; padding-top: 6px; font-size: 16px; line-height: 23px; font-weight: 800; letter-spacing: -.5px; color: var(--ink); }
+.ap-steps p { margin: 2px 0 0; font-size: 14px; line-height: 21px; letter-spacing: -.35px; color: var(--sub); }
+.ap-note2 { margin: 0; font-size: 14px; line-height: 21px; letter-spacing: -.35px; color: var(--ink-2); }
+@media (min-width: 1024px) {
+  .ap-steps li { grid-template-columns: 40px minmax(0, 1fr); column-gap: 14px; padding-bottom: 22px; }
+  .ap-steps li::before { width: 40px; height: 40px; font-size: 14px; }
+  .ap-steps li:not(:last-child)::after { left: 19px; top: 46px; }
+  .ap-steps b { font-size: 18px; line-height: 27px; }
+  .ap-steps p { font-size: 15.5px; line-height: 24px; }
+  .ap-note2 { font-size: 15px; line-height: 23px; }
+}
+
+/* ⑤ 질문 4개(메인 질문 꼴 그대로 · 작게) */
+.ap-qna .faq { margin-top: 14px; }
+.ap-qna .faq summary { padding: 15px 2px; font-size: 16px; line-height: 23px; }
+.ap-qna .faq details[open] summary { padding-bottom: 6px; }
+.ap-qna .faq .a { padding: 0 2px 16px; font-size: 14.5px; line-height: 23px; }
+@media (min-width: 1024px) {
+  .ap-qna .faq summary { padding: 18px 2px; font-size: 17.5px; line-height: 26px; }
+  .ap-qna .faq .a { font-size: 15.5px; line-height: 25px; }
+}
+
+/* ⑥ 마무리 띠(메인 파란 띠 꼴 · 작게) + PC 는 베이커리 사장님 사진 */
+.ap-end { padding-block: 48px 56px; }
+.ap-end .wrap { display: grid; }
+.ap-end .big { font-size: 24px; line-height: 33px; letter-spacing: -.8px; }
+.ap-end .ap-end-pic { display: none; }
+.ap-end .cta { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; max-width: 320px; margin: 24px auto 0; }
+.ap-end .cta .btn { width: 100%; min-height: 52px; font-size: 16px; }
+.ap-end .fine { margin-top: 16px; }
+@media (min-width: 1024px) {
+  .ap-end { padding-block: 72px; text-align: left; }
+  .ap-end .wrap { grid-template-columns: minmax(0, 1fr) 300px; column-gap: 64px; align-items: center; max-width: 1120px; padding: 0 40px; }
+  .ap-end .big { font-size: 34px; line-height: 46px; letter-spacing: -1.2px; text-align: left; }
+  .ap-end .big br { display: inline; }
+  .ap-end .cta { display: flex; flex-direction: row; justify-content: flex-start; max-width: none; margin: 32px 0 0; }
+  .ap-end .cta .btn { width: auto; min-width: 0; padding: 0 22px; font-size: 17px; }
+  .ap-end .fine { text-align: left; }
+  .ap-end .ap-end-pic { display: block; margin: 0; }
+  .ap-end .ap-end-pic img { width: 300px; height: 350px; object-fit: cover; object-position: 50% 30%; border-radius: 24px; box-shadow: 0 24px 50px -30px rgba(5, 20, 80, .7); }
+  .ap-end .ap-end-pic figcaption { margin-top: 8px; font-size: 12px; line-height: 18px; color: rgba(255, 255, 255, .85); text-align: right; }
+}
+
+/* 늘 떠 있는 막대(휴대폰·태블릿): 번호 칸이 화면 위로 지나간 뒤에만 · 입력 중·마무리 띠·열린 창이면 숨김 */
+.ap-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: grid; grid-template-columns: 56px minmax(0, 1fr) minmax(0, 1.35fr); gap: 8px; padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)); background: rgba(255, 255, 255, .96); -webkit-backdrop-filter: saturate(180%) blur(14px); backdrop-filter: saturate(180%) blur(14px); box-shadow: 0 -1px 0 #E5E8EB, 0 -12px 28px -18px rgba(11, 21, 48, .4); transform: translateY(110%); visibility: hidden; transition: transform .28s var(--ease), visibility 0s linear .28s; }
+.ap-bar.on { transform: none; visibility: visible; transition-delay: 0s; }
+.ap-bar a { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 52px; border-radius: 12px; font-size: 16px; font-weight: 800; letter-spacing: -.4px; text-decoration: none; white-space: nowrap; }
+.ap-bar .b-tel { flex-direction: column; gap: 1px; background: #F2F4F6; color: #202124; font-size: 11px; line-height: 14px; font-weight: 700; letter-spacing: -.3px; }
+.ap-bar .b-tel svg { width: 20px; height: 20px; }
+.ap-bar .b-kk { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1px #C9D0DA; }
+.ap-bar .b-kk .kk { width: 22px; height: 22px; }
+.ap-bar .b-go { background: var(--b); color: #fff; }
+.ap-bar .b-t { display: none; }
+.ap-sent .ap-bar { grid-template-columns: 56px minmax(0, 1fr); }
+.ap-sent .ap-bar .b-go { display: none; }
+@media (min-width: 720px) and (max-width: 1023px) { .ap-bar { padding-left: max(12px, calc(50% - 320px)); padding-right: max(12px, calc(50% - 320px)); } }
+@media (max-width: 1023px) { [data-page="apply"] .ft { padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)); } }
+/* PC: 높이 600 이상은 카드가 따라오므로 막대 없음 · 높이 600 미만만 아래 가운데 알약 막대 */
+@media (min-width: 1024px) and (min-height: 600px) { .ap-bar { display: none; } }
+@media (min-width: 1024px) and (max-height: 599px) {
+  .ap-bar { left: 50%; right: auto; bottom: 16px; width: 760px; margin-left: -380px; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 10px 10px 10px 24px; border-radius: 18px; box-shadow: 0 0 0 1px #E3E8F0, 0 18px 40px -16px rgba(11, 21, 48, .45); transform: translateY(140%); }
+  .ap-bar.on { transform: none; }
+  .ap-bar .b-t { display: block; margin: 0; font-size: 15px; line-height: 22px; font-weight: 700; letter-spacing: -.4px; color: var(--ink); }
+  .ap-bar .b-t span { font-weight: 500; color: var(--sub); }
+  .ap-bar .b-tel { display: none; }
+  .ap-bar a { min-height: 48px; padding: 0 18px; font-size: 15px; }
+  .ap-sent .ap-bar { grid-template-columns: minmax(0, 1fr) auto; }
+  [data-page="apply"] .ft { padding-bottom: 104px; }
+}
+/* 바닥글(메인 footer 그대로): PC 에서 글 시작선만 이 쪽 내용 폭(1040)에 맞춤 */
+@media (min-width: 1024px) { [data-page="apply"] .ft .wrap { max-width: 1120px; padding-left: 40px; padding-right: 40px; } }
+@media (prefers-reduced-motion: reduce) { .ap-bar { transition: none; } .ap-card.ping { animation: none; } }
