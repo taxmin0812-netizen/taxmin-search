@@ -788,7 +788,7 @@
         /* 업종 탭에서 열면: 그 업종 · 개인/법인을 미리 골라 2단계부터 */
         preset: function (o) {
           reset(); from = o.from || ''; ind = o.ind || '';
-          if (o.biz) { $$('input[name=biz]', f).forEach(function (r) { r.checked = r.value === o.biz; }); setBiz(); show('2'); }
+          if (o.biz) { $$('input[name=biz]', f).forEach(function (r) { r.checked = r.value === o.biz; }); setBiz(); }
           if (o.calc) { calcR = o.calc; show('4'); }
         },
         q: function () { return $('.ld-step.on .ld-q', f); }
