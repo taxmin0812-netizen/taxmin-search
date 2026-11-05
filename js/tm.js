@@ -566,7 +566,11 @@
     $$('[data-ld-back]', form).forEach(function (b) { b.addEventListener('click', function () { goStep(stepNo - 1, true); }); });
     tI.addEventListener('input', ldSync); oI.addEventListener('change', ldSync); goStep(1);
     /* 기장료 계산을 마친 손님이 예약 창을 열면 업종·매출은 계산 결과대로 두고 번호 단계부터('이전'으로 바꿀 수 있음) */
-    form.addEventListener('ld-open', function () { if (stepNo === 1 && !val('rev') && calcFor()) goStep(3, true); });
+    form.addEventListener('ld-open', function () {
+      if (stepNo !== 1 || val('rev') || !LAST || !LAST.R.done) return;
+      if (!val('ind')) { var ir = form.querySelector('input[name=ind][value="' + LAST.R.ind + '"]'); if (ir) ir.checked = true; }
+      if (calcFor()) goStep(3, true);
+    });
     $$('[data-ld-more]', form).forEach(function (b) {
       var box = $('#' + b.getAttribute('aria-controls'), form), t = $('[data-t]', b);
       if (box) b.addEventListener('click', function () { var on = box.hidden; box.hidden = !on; b.setAttribute('aria-expanded', on ? 'true' : 'false'); if (t) t.textContent = on ? '접기' : '보기'; });
@@ -720,7 +724,8 @@
       $$('[data-ld-back]', f).forEach(function (b) { b.addEventListener('click', function () { step(-1); }); });
       tel.addEventListener('input', function () { if (!eTel.hidden) telErr(''); fmt(tel); });
       ok.addEventListener('change', function () { if (ok.checked && !eOk.hidden) say(eOk, ok, ''); });
-      var place = function () { return kind === 'quick' ? '신청 페이지 첫 화면 칸' : from === 'ind' ? '신청 페이지 업종 탭' : '신청 페이지 신청 창'; };
+      var calcR = null;
+      var place = function () { return kind === 'quick' ? '신청 페이지 첫 화면 칸' : from === 'ind' ? '신청 페이지 업종 탭' : from === 'calc' ? '신청 페이지 기장료 계산' : '신청 페이지 신청 창'; };
       f.addEventListener('submit', function (ev) {
         ev.preventDefault();
         if (busy) return;
@@ -728,16 +733,16 @@
         if (!val('biz')) { show('1', true); return; }
         if (!val('kind')) { show('2', true); return; }
         var file = val('kind') === '신고만 맡기기';
-        if (file ? !picks().length : !val('worry')) { show(file ? '3f' : '3k', true); return; }
+        if (file ? !picks().length : (!val('worry') && !calcR)) { show(file ? '3f' : '3k', true); return; }
         fail.hidden = true;
         if (!TELRE.test(digitsOf(tel.value))) { telErr('휴대폰 번호를 다시 확인해 주세요'); tel.focus(); return; }
         if (!ok.checked) { say(eOk, ok, '[필수] 동의에 체크해 주세요'); ok.focus(); return; }
         if (!ENDPOINT) { fail.hidden = false; return; }
-        var said = [val('biz'), val('kind')].concat(file ? picks() : [val('worry')]).concat([place()]).join(' · ');
+        var said = [val('biz'), val('kind')].concat(file ? picks() : [val('worry') || (calcR ? '기장료 계산 ' + calcR.price : '')]).filter(Boolean).concat([place()]).join(' · ');
         var data = {
           type: 'lead', '요청': '전화 상담 예약', '이름': '(호칭 없음)', '연락처': tel.value.trim(), '통화 편한 시간': '언제든',
           '업종': ind || '(선택 안 함)', '남기실 말씀': said,
-          '작년 매출': '-', '직원(4대보험)': '-', '추천 요금제': '-', '예상 기장료': '-',
+          '작년 매출': calcR ? calcR.rev : '-', '직원(4대보험)': calcR ? calcR.emp : '-', '추천 요금제': calcR ? calcR.tier : '-', '예상 기장료': calcR ? calcR.price : '-',
           '들어온 곳': '(광고 확인 동의 안 함)', '광고': '-', '캠페인': '-', '시안': PAGE,
           '개인정보 수집·이용 동의': '동의함', '_honey': (f.querySelector('[name=hp]') || {}).value || ''
         };
@@ -762,7 +767,7 @@
         f.reset(); telErr(''); say(eOk, ok, ''); fail.hidden = true; idle(); pend = false;
         $$('[data-ap-more]', f).forEach(function (b) { more(b, false); });
         f.hidden = false; done.hidden = true; if (alt) alt.hidden = false; if (tip) tip.hidden = false;
-        from = ''; ind = ''; setBiz(); syncNext(); show('1');
+        from = ''; ind = ''; calcR = null; setBiz(); syncNext(); show('1');
       };
       var rs = $('[data-ap-restart]', card);
       if (rs) rs.addEventListener('click', function () { reset(); var q = $('.ld-step.on .ld-q', f); if (q) { try { q.focus({ preventScroll: true }); } catch (x) { q.focus(); } } });
@@ -772,6 +777,7 @@
         preset: function (o) {
           reset(); from = o.from || ''; ind = o.ind || '';
           if (o.biz) { $$('input[name=biz]', f).forEach(function (r) { r.checked = r.value === o.biz; }); setBiz(); show('2'); }
+          if (o.calc) { calcR = o.calc; $$('input[name=kind]', f).forEach(function (r) { r.checked = r.value === '세무 기장'; }); syncNext(); show('4'); }
         },
         q: function () { return $('.ld-step.on .ld-q', f); }
       };
@@ -797,12 +803,18 @@
       if (o) {
         ev.preventDefault();
         var ind = o.getAttribute('data-ind') || '';
-        openAp(ind ? { from: 'ind', ind: ind, biz: ind === '법인' ? '법인사업자' : '개인사업자' } : {});
+        var bz = o.getAttribute('data-biz') || '';
+        openAp(ind ? { from: 'ind', ind: ind, biz: ind === '법인' ? '법인사업자' : '개인사업자' } : bz ? { biz: bz } : {});
         track('rsv_open', { position: 'ap_' + o.getAttribute('data-ap-open') });
         return;
       }
       var r = ev.target.closest('a[href="#rsv"]');
-      if (r) { ev.preventDefault(); openAp({}); track('rsv_open', { position: r.getAttribute('data-track') || '' }); }
+      if (r) {
+        ev.preventDefault();
+        var fromCalc = r.getAttribute('data-track') === 'consult_jump_calc' && LAST && LAST.R && LAST.R.done;
+        openAp(fromCalc ? { from: 'calc', calc: LAST.R, ind: LAST.R.ind, biz: LAST.R.corp ? '법인사업자' : '개인사업자' } : {});
+        track('rsv_open', { position: r.getAttribute('data-track') || '' });
+      }
     });
 
     /* 머리줄 메뉴(1024 미만): ≡ → 아래로 펼치는 판 · 메뉴를 누르면 그 칸으로 가며 닫힘 · Esc·바깥 누름·초점이 머리줄 밖으로 나가면 닫힘 */
