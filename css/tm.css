@@ -2932,3 +2932,18 @@ html.tm-off .ld-ic.tel { display: none; }
 /* ── 22차-8b 첫 화면 '월 4만원부터' 더 크게(대표님) ── */
 [data-page="apply"] .ap-h1b { font-size: 54px; line-height: 62px; }
 @media (min-width: 960px) { [data-page="apply"] .ap-h1b { font-size: 88px; line-height: 96px; } }
+
+/* ── 23차 평가 반영: 첫 화면 믿을 근거·상담 시간 밖 안내 · 요금 조건 줄 · 흰 띠 없앰 · 요금 카드 줄 간격 · 원형 그림 이름표 · 밤 막대 '전화 예약' 글 ── */
+.ap-trust { margin: 12px 0 0; font-size: 14px; line-height: 20px; font-weight: 600; color: rgba(255, 255, 255, .88); }
+.ap-off { display: none; margin: 8px 0 0; padding: 8px 12px; border-radius: 10px; background: rgba(255, 255, 255, .14); font-size: 13px; line-height: 19px; color: #fff; }
+html.tm-off .ap-off { display: block; }
+.ap-plan-c { margin: 12px 0 0; font-size: 14px; line-height: 21px; color: #3C4658; }
+.ap-plan-l li { line-height: 23px; min-height: 23px; }
+.ap-plan-l { gap: 8px; align-content: start; }
+[data-page="apply"] #flow { margin-top: 0; }
+[data-page="apply"] .fn b, [data-page="apply"] .fn-plus b { font-size: 13px; line-height: 17px; }
+html.tm-off [data-page="apply"] .ap-bar-tt, html.tm-off .ap-bar-tel .ap-bar-tt { display: inline; }
+@media (min-width: 960px) {
+  .ap-trust { font-size: 15px; }
+  .ap-plan-c { text-align: center; font-size: 15px; }
+}

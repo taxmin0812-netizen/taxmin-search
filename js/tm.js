@@ -12,7 +12,7 @@
   var KAKAO = C.kakao || 'https://pf.kakao.com/_Mxojqs/chat';
   var TEL = C.tel || '0507-1445-7729';
   var ENDPOINT = C.endpoint || '';
-  var PAGE = (C.pagePrefix || 'srch-') + (doc.body.getAttribute('data-page') || 'main');
+  var PAGE = (C.pagePrefix || 'srch-') + (doc.body.getAttribute('data-pg') ? 'home-' + doc.body.getAttribute('data-pg') : (doc.body.getAttribute('data-page') || 'main'));
   var calm = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   var bot = /bot|crawl|spider|Yeti|AdsBot|HeadlessChrome/i.test(navigator.userAgent) || /[?&]norv\b/.test(location.search);
   var still = calm || bot;
@@ -680,9 +680,9 @@
         if (calcR) return [calcR.price, calcR.ind + ' · 작년 매출 ' + calcR.rev + ' · 직원 ' + calcR.emp];
         if (val('biz') === '법인사업자') return ['월 10만원부터', '장부·거래량을 보고 상담 때 정해요'];
         var r = val('rev'), m = val('emp'), small = r === '올해 시작' || r === '3억 이하';
-        if (r === '10억 이상') return ['월 7만원부터', '매출 구간에 따라 상담 때 정해요'];
+        if (r === '10억 이상') return ['월 7~15만원', '업종·매출 구간에 따라 상담 때 정해요'];
         if (small) return m === '1~4명' ? ['월 5~6만원', '직원 1~3명 월 5만원 · 4명 월 6만원'] : m === '5명 이상' ? ['월 6만원부터', '직원 수에 따라 상담 때 정해요'] : ['월 4만원', '종합소득세 신고 수수료 별도'];
-        return m === '1~4명' ? ['월 5~8만원', '업종에 따라 달라져요'] : m === '5명 이상' ? ['월 6만원부터', '업종·직원 수에 따라 상담 때 정해요'] : ['월 4~8만원', '업종에 따라 달라져요'];
+        return m === '1~4명' ? ['월 5~15만원', '업종에 따라 달라져요(매출이 크면 성실신고 구간)'] : m === '5명 이상' ? ['월 6~15만원', '업종·직원 수에 따라 상담 때 정해요'] : ['월 4~15만원', '업종에 따라 달라져요(매출이 크면 성실신고 구간)'];
       };
       var estSync = function () { var x = est(); if (estP) estP.textContent = x[0]; if (estS) estS.textContent = x[1]; };
       var say = function (el, inp, msg) { el.textContent = msg; el.hidden = !msg; if (msg) inp.setAttribute('aria-invalid', 'true'); else inp.removeAttribute('aria-invalid'); };
@@ -766,7 +766,7 @@
             clearTimeout(to); idle(); t = String(t || '').trim();
             if (t === 'bad') { telErr('휴대폰 번호를 다시 확인해 주세요'); tel.focus(); return; }
             if (t !== 'ok' && t !== 'dup' && t !== 'held') { fail.hidden = false; return; }
-            track('form_submit', { anon: 1 });
+            track('form_submit', {});
             f.hidden = true; done.hidden = false; if (alt) alt.hidden = true;
             if (tip) tip.hidden = true;
             if (lb) lb.style.width = '100%';
