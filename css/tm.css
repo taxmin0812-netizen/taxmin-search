@@ -2875,3 +2875,10 @@ html.tm-off .ld-ic.tel { display: none; }
 /* ── 22차-4c 안내 글은 한 줄(넘치면 말줄임) ── */
 .ap-fit-n, [data-page="apply"] .ap-ind-b, [data-page="apply"] .ap-incl-t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ap-fit-l li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── 22차-5 계산기 직원 수 4칸(없음·1~3명·4~5명·6명 이상) · 자주 묻는 질문 한 칸(제목 숨긴 쪽에서 좁은 칸에 몰리던 것) ── */
+.cd-opts.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (min-width: 960px) {
+  .ap-faq-in { display: block; max-width: 820px; }
+  .ap-faq-in > .ap-h2:not(.sr) { margin-bottom: 28px; text-align: center; }
+}

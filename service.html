@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://wcs.naver.net https://ssl.pstatic.net; style-src 'self'; font-src 'self'; media-src 'self'; img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com https://www.google.com https://www.google.co.kr https://googleads.g.doubleclick.net https://ad.doubleclick.net https://www.googleadservices.com https://*.naver.com https://*.pstatic.net; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.google.com https://googleads.g.doubleclick.net https://ad.doubleclick.net https://*.naver.com; frame-src https://www.googletagmanager.com https://td.doubleclick.net; base-uri 'self'; form-action 'self'; object-src 'none'">
 <title>서비스 소개 · 이런 사장님께 맞아요 | 택스민</title>
-<meta name="description" content="번호를 남기시면 평일에 전화드려요. 개인사업자 세무 기장 월 5만원부터(부가세 별도) · 작년 매출 기본 구간(업종별 3억~9억원 이하) · 4대보험 직원 3명까지 · 종합소득세 신고비 별도.">
+<meta name="description" content="번호를 남기시면 평일에 전화드려요. 개인사업자 세무 기장 월 4만원부터(부가세 별도) · 작년 매출 기본 구간(업종별 3억~9억원 이하) · 4대보험 직원 없을 때 · 종합소득세 신고비 별도.">
 <meta name="robots" content="noindex, follow">
 <meta name="theme-color" content="#F7F8FA">
 <meta name="format-detection" content="telephone=no">
@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="택스민(세무회계 민)">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:title" content="서비스 소개 · 이런 사장님께 맞아요 | 택스민">
-<meta property="og:description" content="번호를 남기시면 평일에 전화드려요. 개인사업자 세무 기장 월 5만원부터(부가세 별도) · 작년 매출 기본 구간(업종별 3억~9억원 이하) · 4대보험 직원 3명까지 · 종합소득세 신고비 별도.">
+<meta property="og:description" content="번호를 남기시면 평일에 전화드려요. 개인사업자 세무 기장 월 4만원부터(부가세 별도) · 작년 매출 기본 구간(업종별 3억~9억원 이하) · 4대보험 직원 없을 때 · 종합소득세 신고비 별도.">
 <meta property="og:image" content="img/og-v6.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -26,12 +26,12 @@
 <link rel="preload" href="fonts/pretendard/woff2/PretendardVariable.subset.91.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/pretendard/woff2/PretendardVariable.subset.89.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/pretendard/woff2/PretendardVariable.subset.88.woff2" as="font" type="font/woff2" crossorigin>
-<script src="js/early.js?v=20261105u"></script>
+<script src="js/early.js?v=20261105v"></script>
 <link rel="stylesheet" href="fonts/pretendard/pretendard.css">
-<link rel="stylesheet" href="css/tm.css?v=20261105u">
-<script src="js/config.js?v=20261105u" defer></script>
-<script src="js/tags.js?v=20261105u" defer></script>
-<script src="js/tm.js?v=20261105u" defer></script>
+<link rel="stylesheet" href="css/tm.css?v=20261105v">
+<script src="js/config.js?v=20261105v" defer></script>
+<script src="js/tags.js?v=20261105v" defer></script>
+<script src="js/tm.js?v=20261105v" defer></script>
 </head>
 <body data-page="apply">
 <a class="skip" href="#main">본문으로 바로 가기</a>
@@ -68,7 +68,7 @@
   <h2 class="ap-h2" id="ap-fit-h">이런 사장님께 맞아요</h2>
   <ul class="ap-fit-l">
     <li>작년 매출 기본 구간 이내 개인사업자</li>
-    <li>4대보험 직원이 3명까지인 가게</li>
+    <li>4대보험 직원이 없거나 3명까지인 가게</li>
     <li>법인은 월 10만원부터(부가세 별도)</li>
   </ul>
   <h2 class="ap-h2 ap-fit-h2">업종별로 이렇게 챙겨요</h2>
@@ -123,12 +123,13 @@
         <button type="button" data-v="hi" aria-pressed="false">성실신고 구간</button>
       </div></div>
     <div class="cd-q" data-q="emp"><p class="cd-l"><span class="st">STEP 3</span>4대보험 직원<small>사장님 제외</small></p>
-      <div class="cd-opts three" data-k="emp" role="group" aria-label="4대보험 직원 수">
-        <button type="button" data-v="3" aria-pressed="true">0~3명</button>
+      <div class="cd-opts three four" data-k="emp" role="group" aria-label="4대보험 직원 수">
+        <button type="button" data-v="0" aria-pressed="true">없음</button>
+        <button type="button" data-v="3" aria-pressed="false">1~3명</button>
         <button type="button" data-v="5" aria-pressed="false">4~5명</button>
         <button type="button" data-v="6" aria-pressed="false">6명 이상</button>
       </div></div>
-    <div class="cd-res" data-cd-res aria-live="polite"><p class="lbl">예상 기장료</p><p class="price num">월 5만원부터<small>부가세 별도</small></p><p class="incl">업종부터 골라 주세요.</p></div>
+    <div class="cd-res" data-cd-res aria-live="polite"><p class="lbl">예상 기장료</p><p class="price num">월 4만원부터<small>부가세 별도</small></p><p class="incl">업종부터 골라 주세요.</p></div>
     <div class="cd-acts">
       <a class="btn btn-primary btn-block" href="https://pf.kakao.com/_Mxojqs/chat" data-kakao="calc" data-copy><span class="kk"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6c-5 0-9 3.1-9 7 0 2.5 1.7 4.7 4.2 5.9l-.9 3.5c-.1.4.4.7.7.4l4.2-2.8h.8c5 0 9-3.1 9-7s-4-7-9-7z" fill="currentColor"/></svg></span>카톡으로 상담하기</a>
       <a class="btn btn-line btn-block" href="#rsv" data-close data-track="consult_jump_calc">전화 예약</a>
