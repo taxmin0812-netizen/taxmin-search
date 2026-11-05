@@ -2952,3 +2952,52 @@ html.tm-off [data-page="apply"] .ap-bar-tt, html.tm-off .ap-bar-tel .ap-bar-tt {
 .ap-off { padding: 0; border-radius: 0; background: none; color: rgba(255, 255, 255, .85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ap-fit-l li { padding: 0; border-radius: 0; background: none; }
 @media (max-width: 379px) { .ap-off { font-size: 12px; letter-spacing: -0.03em; } }
+
+/* ── 24차 언슬롭 다듬기(신청 쪽 /home/ 만 — [data-page="apply"]) ──
+   방향: 숫자가 분명한 · 차분한 · 동네 세무사처럼 편한 / 계산대 위 영수증과 장부(흰 종이 · 남색 잉크)
+   강조는 두 곳(첫 화면 사진+가격 · 요금 카드 금액)만, 나머지 바탕은 흰색·아주 연한 회색 두 가지, 파랑은 주 버튼·핵심 숫자에만 */
+[data-page="apply"] { --ap-g: #F6F7F9; }
+/* 바탕: 흰색 ↔ 연한 회색 번갈아(원형 그림 흰 · 업종 회 · 진행 흰 · 요금 회 · 질문 흰 · 마무리 남색) */
+[data-page="apply"] #flow { background: #fff; }
+[data-page="apply"] .ap-ind { background: var(--ap-g); }
+[data-page="apply"] .ap-flow { background: #fff; color: #0B1530; border-top: 1px solid rgba(11, 21, 48, .08); }
+[data-page="apply"] .ap-flow .ap-h2 { color: #0B1530; }
+[data-page="apply"] .ap-flow :focus-visible { outline-color: #2554F0; }
+[data-page="apply"] .ap-steps h3 { color: #0B1530; }
+[data-page="apply"] .ap-steps p { color: #5A6478; }
+[data-page="apply"] .ap-steps li:not(:last-child)::before { background: rgba(11, 21, 48, .14); }
+[data-page="apply"] .ap-steps .ap-n { background: #fff; color: #2554F0; box-shadow: inset 0 0 0 1.5px #2554F0; }
+[data-page="apply"] .ap-price { background: var(--ap-g); }
+[data-page="apply"] .ap-plan { background: #fff; box-shadow: 0 0 0 1px rgba(11, 21, 48, .08); }
+/* 파랑 절제: 카드 소제목·목록 막대는 회색 */
+[data-page="apply"] .ap-plan-s { color: #5A6478; font-weight: 500; }
+[data-page="apply"] .ap-plan-l li::before { background: #C5CDDA; }
+/* 굵기: 큰 제목 700 · 소제목 600 · 본문 400 */
+[data-page="apply"] .ap-h2, [data-page="apply"] .flow-txt .big { font-weight: 700; }
+[data-page="apply"] .ap-h1b { font-weight: 700; }
+[data-page="apply"] main h3, [data-page="apply"] .ap-plan-k { font-weight: 600; }
+[data-page="apply"] .ap-plan-k { font-size: 18px; line-height: 26px; }
+/* 가격: '월 4만원' 한 꼴 · 영수증 점선 위 금액 · '부가세 별도'는 알약 대신 조용한 글 */
+[data-page="apply"] .ap-plan-p { margin: 20px 0 16px; padding-top: 16px; border-top: 1px dashed #C5CDDA; }
+[data-page="apply"] .ap-plan-p .num { font-size: 28px; line-height: 36px; font-weight: 700; letter-spacing: -0.03em; }
+[data-page="apply"] .ap-plan-v, [data-page="apply"] .ap-vat { padding: 0; height: auto; border-radius: 0; background: none; font-size: 13px; font-weight: 500; letter-spacing: 0; vertical-align: baseline; }
+[data-page="apply"] .ap-plan-v { color: #5A6478; margin-left: 6px; }
+[data-page="apply"] .ap-hero .ap-vat { color: rgba(255, 255, 255, .8); font-size: 14px; }
+[data-page="apply"] .ap-est-p .ap-vat { color: #5A6478; background: none; }
+/* 첫 화면: 낮엔 믿을 근거 한 줄, 밤엔 그 자리에 안내 한 줄 */
+html.tm-off [data-page="apply"] .ap-trust { display: none; }
+[data-page="apply"] .ap-off { margin-top: 12px; }
+/* 마무리 띠: 사진 빼고 남색 바탕(사람 사진 반복 줄임) */
+[data-page="apply"] .ap-band { height: auto; background: #0B1530; align-items: center; }
+[data-page="apply"] .ap-band-pic, [data-page="apply"] .ap-band::before { display: none; }
+[data-page="apply"] .ap-band-in { padding-top: 56px; padding-bottom: 56px; }
+/* 업종 탭: 휴대폰에서 잘리지 않게 두 줄 */
+[data-page="apply"] .ap-tabs { flex-wrap: wrap; justify-content: center; overflow: visible; margin-left: 0; margin-right: 0; padding: 0; }
+/* 칸 위아래 여백 통일: 휴대폰 56 · PC 96 */
+[data-page="apply"] .ap-sec, [data-page="apply"] #flow { padding-top: 56px; padding-bottom: 56px; }
+@media (min-width: 960px) {
+  [data-page="apply"] .ap-sec, [data-page="apply"] #flow { padding-top: 96px; padding-bottom: 96px; }
+  [data-page="apply"] .ap-plan-p .num { font-size: 34px; line-height: 42px; }
+  [data-page="apply"] .ap-plan-k { font-size: 20px; line-height: 28px; }
+  [data-page="apply"] .ap-band-in { padding-top: 80px; padding-bottom: 80px; }
+}
