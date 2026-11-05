@@ -2861,3 +2861,13 @@ html.tm-off .ld-ic.tel { display: none; }
   .ap-fit-t small { font-size: 13px; }
   .ap-fit-t b { font-size: 16px; line-height: 23px; }
 }
+
+/* ── 22차-4b 서비스 소개 업종 사진: 한 줄 옆으로 넘기기(세로 줄임 · 화살표 없음 · 손가락/휠로 밀기) ── */
+.ap-fit-g { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; margin-left: -20px; margin-right: -20px; padding: 0 20px 4px; scroll-padding: 0 20px; }
+.ap-fit-g::-webkit-scrollbar { display: none; }
+.ap-fit-g li { flex: 0 0 168px; scroll-snap-align: start; }
+.ap-fit-c { aspect-ratio: 3 / 4; }
+@media (min-width: 960px) {
+  .ap-fit-g { gap: 16px; margin-left: 0; margin-right: 0; padding: 0 0 6px; scroll-padding: 0; }
+  .ap-fit-g li { flex-basis: 220px; }
+}
