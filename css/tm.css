@@ -2928,3 +2928,7 @@ html.tm-off .ld-ic.tel { display: none; }
 .ap-est-p .ap-vat { background: #fff; color: #2554F0; vertical-align: 5px; }
 .ap-est-s { margin: 2px 0 0; font-size: 13px; line-height: 20px; color: #5A6478; }
 .ap-est-s:empty { display: none; }
+
+/* ── 22차-8b 첫 화면 '월 4만원부터' 더 크게(대표님) ── */
+[data-page="apply"] .ap-h1b { font-size: 54px; line-height: 62px; }
+@media (min-width: 960px) { [data-page="apply"] .ap-h1b { font-size: 88px; line-height: 96px; } }
