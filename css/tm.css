@@ -2792,3 +2792,72 @@ html.tm-off .ld-ic.tel { display: none; }
   .ap-sub h1 { font-size: 44px; line-height: 56px; }
   .ap-sub-l { font-size: 18px; line-height: 28px; }
 }
+
+/* ── 22차-4 = 신청 쪽 글자 체계 정리(크기 단계 줄이고 줄 간격·자간 통일) + 메뉴 쪽 로고 바탕 + 서비스 소개 ── */
+/* 단계(휴대폰 → PC 960~): 가격 44 → 64 · 쪽 제목 30 → 44 · 칸 제목 24 → 34 · 카드 제목 18 → 20 · 본문 15 → 17 · 작은 글 13 → 14 · 단추·탭 16
+   자간: 큰 제목 -0.03em · 제목 -0.025em · 본문·단추 -0.01em · 줄 간격: 제목 1.35 · 본문 1.6 */
+[data-page="apply"] { letter-spacing: -0.01em; }
+[data-page="apply"] main p, [data-page="apply"] main li, [data-page="apply"] dialog p { letter-spacing: -0.01em; }
+[data-page="apply"] .ap-h1a { font-size: 20px; line-height: 28px; font-weight: 700; letter-spacing: -0.02em; }
+[data-page="apply"] .ap-h1b { font-size: 44px; line-height: 52px; letter-spacing: -0.03em; }
+[data-page="apply"] .ap-h1b .num { font-size: inherit; line-height: inherit; letter-spacing: inherit; }
+[data-page="apply"] .ap-vat { height: 26px; font-size: 13px; letter-spacing: 0; }
+[data-page="apply"] .ap-lede { margin-top: 12px; font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: -0.01em; }
+[data-page="apply"] .ap-cond { font-size: 13px; line-height: 20px; letter-spacing: 0; }
+[data-page="apply"] .ap-eb { margin-bottom: 8px; font-size: 14px; line-height: 20px; font-weight: 700; letter-spacing: -0.01em; }
+[data-page="apply"] .ap-h2 { font-size: 24px; line-height: 33px; font-weight: 800; letter-spacing: -0.025em; }
+[data-page="apply"] main h3 { font-size: 18px; line-height: 26px; font-weight: 700; letter-spacing: -0.02em; }
+[data-page="apply"] .ap-ind-p h3 { font-size: 22px; line-height: 30px; }
+[data-page="apply"] main p { font-size: 15px; line-height: 24px; }
+[data-page="apply"] .ap-ind-a { font-size: 15px; line-height: 24px; font-weight: 500; }
+[data-page="apply"] .ap-ind-b, [data-page="apply"] .ap-fit-n, [data-page="apply"] .ap-incl-t { font-size: 13px; line-height: 20px; letter-spacing: 0; }
+[data-page="apply"] .ap-btn, [data-page="apply"] .ap-bar-go { font-size: 16px; line-height: 22px; letter-spacing: -0.01em; }
+[data-page="apply"] .ap-tab, [data-page="apply"] .ap-segb, [data-page="apply"] .ap-chips li { font-size: 15px; line-height: 22px; letter-spacing: -0.01em; }
+[data-page="apply"] .ap-nav a { letter-spacing: -0.01em; }
+[data-page="apply"] .ap-sub h1 { letter-spacing: -0.03em; }
+[data-page="apply"] .ap-sub-l { font-size: 15px; line-height: 24px; letter-spacing: -0.01em; }
+
+/* 메뉴 쪽 남색 칸: 로고 m 을 오른쪽 뒤에 은은하게 */
+.ap-sub { position: relative; overflow: hidden; }
+.ap-sub .ap-w { position: relative; z-index: 1; }
+.ap-sub-m { position: absolute; right: -36px; bottom: -28px; width: 230px; opacity: .07; pointer-events: none; }
+.ap-sub-m svg { display: block; width: 100%; height: auto; }
+
+/* 서비스 소개 */
+.ap-fit-l { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.ap-fit-l li { position: relative; padding-left: 26px; font-size: 15px; line-height: 24px; }
+.ap-fit-l li::before { content: ""; position: absolute; left: 2px; top: 6px; width: 14px; height: 8px; border-left: 2.5px solid #2554F0; border-bottom: 2.5px solid #2554F0; transform: rotate(-45deg); }
+.ap-fit-h2 { margin-top: 48px; }
+.ap-fit-g { margin: 20px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.ap-fit-c { position: relative; display: block; width: 100%; padding: 0; border: 0; border-radius: 16px; overflow: hidden; background: #0B1530; cursor: pointer; aspect-ratio: 4 / 5; text-align: left; font-family: inherit; }
+.ap-fit-c img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; }
+.ap-fit-c::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(11, 21, 48, .86) 0%, rgba(11, 21, 48, 0) 55%); }
+.ap-fit-t { position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 1; color: #fff; }
+.ap-fit-t small { display: block; font-size: 12px; line-height: 18px; font-weight: 700; opacity: .85; }
+.ap-fit-t b { display: block; margin-top: 2px; font-size: 14px; line-height: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.ap-fit-c:focus-visible { outline: 3px solid #2554F0; outline-offset: 3px; }
+.ap-fit-n { margin-top: 14px; color: var(--ap-sub, #5A6478); }
+
+@media (min-width: 960px) {
+  [data-page="apply"] .ap-h1a { font-size: 26px; line-height: 36px; }
+  [data-page="apply"] .ap-h1b { font-size: 64px; line-height: 72px; }
+  [data-page="apply"] .ap-vat { height: 30px; font-size: 14px; }
+  [data-page="apply"] .ap-lede { font-size: 18px; line-height: 28px; }
+  [data-page="apply"] .ap-cond { font-size: 14px; line-height: 22px; }
+  [data-page="apply"] .ap-eb { font-size: 15px; line-height: 22px; }
+  [data-page="apply"] .ap-h2 { font-size: 34px; line-height: 46px; }
+  [data-page="apply"] main h3 { font-size: 20px; line-height: 30px; }
+  [data-page="apply"] .ap-ind-p h3 { font-size: 28px; line-height: 38px; }
+  [data-page="apply"] main p { font-size: 17px; line-height: 28px; }
+  [data-page="apply"] .ap-ind-a { font-size: 17px; line-height: 28px; }
+  [data-page="apply"] .ap-ind-b, [data-page="apply"] .ap-fit-n, [data-page="apply"] .ap-incl-t { font-size: 14px; line-height: 22px; }
+  [data-page="apply"] .ap-tab, [data-page="apply"] .ap-segb, [data-page="apply"] .ap-chips li { font-size: 16px; }
+  [data-page="apply"] .ap-sub-l { font-size: 18px; line-height: 28px; }
+  .ap-sub-m { right: 6%; bottom: -60px; width: 420px; }
+  .ap-fit-l li { font-size: 17px; line-height: 28px; }
+  .ap-fit-h2 { margin-top: 72px; }
+  .ap-fit-g { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 28px; }
+  .ap-fit-t { left: 16px; right: 16px; bottom: 16px; }
+  .ap-fit-t small { font-size: 13px; }
+  .ap-fit-t b { font-size: 16px; line-height: 23px; }
+}
