@@ -673,14 +673,25 @@
       var cur = '1', busy = false, pend = false, lastKey = '', from = '', ind = '';
       var val = function (n) { return (f.querySelector('input[name=' + n + ']:checked') || {}).value || ''; };
       var picks = function () { return $$('input[name=filing]:checked', f).map(function (x) { return x.value; }); };
-      var order = function () { return ['1', '2', val('kind') === '신고만 맡기기' ? '3f' : '3k', '4']; };
+      var order = function () { return ['1', '2', '3', '4']; };
+      /* 예상 기장료(부가세 별도): 개인 = 작년 매출·직원 수로 · 법인 = 월 10만원부터 · 기장료 계산에서 왔으면 그 결과 */
+      var estP = $('[data-ap-est-p]', f), estS = $('[data-ap-est-s]', f);
+      var est = function () {
+        if (calcR) return [calcR.price, calcR.ind + ' · 작년 매출 ' + calcR.rev + ' · 직원 ' + calcR.emp];
+        if (val('biz') === '법인사업자') return ['월 10만원부터', '장부·거래량을 보고 상담 때 정해요'];
+        var r = val('rev'), m = val('emp'), small = r === '올해 시작' || r === '3억 이하';
+        if (r === '10억 이상') return ['월 7만원부터', '매출 구간에 따라 상담 때 정해요'];
+        if (small) return m === '1~4명' ? ['월 5~6만원', '직원 1~3명 월 5만원 · 4명 월 6만원'] : m === '5명 이상' ? ['월 6만원부터', '직원 수에 따라 상담 때 정해요'] : ['월 4만원', '종합소득세 신고 수수료 별도'];
+        return m === '1~4명' ? ['월 5~8만원', '업종에 따라 달라져요'] : m === '5명 이상' ? ['월 6만원부터', '업종·직원 수에 따라 상담 때 정해요'] : ['월 4~8만원', '업종에 따라 달라져요'];
+      };
+      var estSync = function () { var x = est(); if (estP) estP.textContent = x[0]; if (estS) estS.textContent = x[1]; };
       var say = function (el, inp, msg) { el.textContent = msg; el.hidden = !msg; if (msg) inp.setAttribute('aria-invalid', 'true'); else inp.removeAttribute('aria-invalid'); };
       var telErr = function (msg) { say(eTel, tel, msg); tel.parentNode.classList.toggle('bad', !!msg); };
       var idle = function () { busy = false; go.removeAttribute('aria-disabled'); go.removeAttribute('aria-busy'); };
       var setBiz = function () { card.setAttribute('data-biz', val('biz') === '법인사업자' ? 'corp' : 'ind'); };
       var syncNext = function () { if (nextB) nextB.disabled = !picks().length; };
       var show = function (s, user) {
-        cur = s;
+        cur = s; if (s === '4') estSync();
         steps.forEach(function (st) { st.classList.toggle('on', st.getAttribute('data-step') === s); });
         var n = order().indexOf(s) + 1, pct = n * 25;
         if (lb) lb.style.width = pct + '%';
@@ -719,6 +730,7 @@
           syncNext();
         }
         if (n === 'filing') syncNext();
+        if (n === 'rev' || n === 'emp' || n === 'biz') estSync();
       });
       if (nextB) nextB.addEventListener('click', function () { if (!picks().length) return; track('rsv_step', { step: '3f', value: picks().join('·'), position: 'ap_' + kind }); step(1); });
       $$('[data-ld-back]', f).forEach(function (b) { b.addEventListener('click', function () { step(-1); }); });
@@ -731,18 +743,18 @@
         if (busy) return;
         /* 앞 단계를 다 고르지 않았으면(번호 칸에서 Enter 등) 그 단계로 */
         if (!val('biz')) { show('1', true); return; }
-        if (!val('kind')) { show('2', true); return; }
-        var file = val('kind') === '신고만 맡기기';
-        if (file ? !picks().length : (!val('worry') && !calcR)) { show(file ? '3f' : '3k', true); return; }
+        if (!calcR && !val('rev')) { show('2', true); return; }
+        if (!calcR && !val('emp')) { show('3', true); return; }
         fail.hidden = true;
         if (!TELRE.test(digitsOf(tel.value))) { telErr('휴대폰 번호를 다시 확인해 주세요'); tel.focus(); return; }
         if (!ok.checked) { say(eOk, ok, '[필수] 동의에 체크해 주세요'); ok.focus(); return; }
         if (!ENDPOINT) { fail.hidden = false; return; }
-        var said = [val('biz'), val('kind')].concat(file ? picks() : [val('worry') || (calcR ? '기장료 계산 ' + calcR.price : '')]).filter(Boolean).concat([place()]).join(' · ');
+        var ex = est();
+        var said = [val('biz'), calcR ? '기장료 계산 ' + calcR.price : '작년 매출 ' + val('rev'), calcR ? '' : (val('emp') === '직원 없음' ? '직원 없음' : '직원 ' + val('emp')), '예상 ' + ex[0], place()].filter(Boolean).join(' · ');
         var data = {
           type: 'lead', '요청': '전화 상담 예약', '이름': '(호칭 없음)', '연락처': tel.value.trim(), '통화 편한 시간': '언제든',
           '업종': ind || '(선택 안 함)', '남기실 말씀': said,
-          '작년 매출': calcR ? calcR.rev : '-', '직원(4대보험)': calcR ? calcR.emp : '-', '추천 요금제': calcR ? calcR.tier : '-', '예상 기장료': calcR ? calcR.price : '-',
+          '작년 매출': calcR ? calcR.rev : (val('rev') || '-'), '직원(4대보험)': calcR ? calcR.emp : (val('emp') || '-'), '추천 요금제': calcR ? calcR.tier : '-', '예상 기장료': ex[0] + ' (부가세 별도)',
           '들어온 곳': '(광고 확인 동의 안 함)', '광고': '-', '캠페인': '-', '시안': PAGE,
           '개인정보 수집·이용 동의': '동의함', '_honey': (f.querySelector('[name=hp]') || {}).value || ''
         };
@@ -777,7 +789,7 @@
         preset: function (o) {
           reset(); from = o.from || ''; ind = o.ind || '';
           if (o.biz) { $$('input[name=biz]', f).forEach(function (r) { r.checked = r.value === o.biz; }); setBiz(); show('2'); }
-          if (o.calc) { calcR = o.calc; $$('input[name=kind]', f).forEach(function (r) { r.checked = r.value === '세무 기장'; }); syncNext(); show('4'); }
+          if (o.calc) { calcR = o.calc; show('4'); }
         },
         q: function () { return $('.ld-step.on .ld-q', f); }
       };

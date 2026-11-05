@@ -2918,3 +2918,13 @@ html.tm-off .ld-ic.tel { display: none; }
   .ap-fit-l li { flex-direction: row; align-items: center; gap: 12px; padding: 18px 20px; font-size: 17px; line-height: 26px; }
   .ap-fit-l li .num { width: 32px; height: 32px; font-size: 15px; flex: none; }
 }
+
+/* ── 22차-7 신청 4단계: 직원 수 안내 · 예상 기장료 판 ── */
+.ap-o-n { margin: 10px 0 0; font-size: 13px; line-height: 20px; color: #5A6478; }
+.ap-est { margin: 0 0 16px; padding: 16px 18px; border-radius: 16px; background: #EEF3FF; }
+.ap-est-l { margin: 0; font-size: 13px; line-height: 20px; font-weight: 700; color: #2554F0; }
+.ap-est-p { margin: 4px 0 0; color: #0B1530; }
+.ap-est-p .num { font-size: 28px; line-height: 36px; font-weight: 800; letter-spacing: -0.03em; }
+.ap-est-p .ap-vat { background: #fff; color: #2554F0; vertical-align: 5px; }
+.ap-est-s { margin: 2px 0 0; font-size: 13px; line-height: 20px; color: #5A6478; }
+.ap-est-s:empty { display: none; }
