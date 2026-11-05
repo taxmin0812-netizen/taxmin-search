@@ -2168,3 +2168,15 @@ html.tm-off .ld-ic.tel { display: none; }
   .ld-step.on { gap: 8px; }
   .ld-opt span { min-height: 48px; }
 }
+
+/* ── 20차 = 첫 화면 그림 처음 짜임(대표님 시안 꼴)으로 되돌림 + 예쁜 20대 카페 사장님 사진 ───────── */
+/* 13차 요소(.hc-lines·.hc-b1~3·.hc-sch·.hc-eff·.hc-card·.hc-price)를 17차 판 1024×817 에 맞게 아래로 넓혀 놓음 */
+.hc .hc-lines { height: 817px; }
+.hc .hc-photo { left: 335px; top: 70px; width: 514px; height: 600px; max-width: none; object-fit: cover; object-position: 50% 30%; border-radius: 28px; box-shadow: 0 30px 60px -36px rgba(11, 21, 48, .55); }
+.hc .hc-b1 { top: 150px; }
+.hc .hc-b2 { top: 290px; }
+.hc .hc-b3 { top: 300px; }
+.hc .hc-sch { top: 70px; }
+.hc .hc-eff { top: 470px; }
+.hc .hc-card { top: 520px; }
+.hc .hc-price { top: 548px; }
