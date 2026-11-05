@@ -620,29 +620,35 @@
     });
   }
 
-  /* ── 22차-2 신청 페이지(apply.html — 리드넘버·택스앤톡 구성): 짧은 신청 칸 · 신청 창(#ap-dlg) · 업종 탭 · 요금 탭·펼침 · 떠 있는 막대
+  /* ── 22차-3 신청 페이지(apply.html): 상담 신청 4단계(첫 화면 칸 · 신청 창 #ap-dlg 같은 부품) · 머리줄 메뉴 · 업종 탭 · 요금 탭·펼침 · 떠 있는 막대
      메인(index.html)에는 #ap-dlg 가 없어서 이 덩어리는 아무것도 하지 않는다(위 메인 동작은 그대로).
-     접수 = 메인 예약과 같은 주소·같은 키 순서. [선택] 광고 동의가 없으니 들어온 곳·광고·캠페인은 메인 '동의 안 함' 값, form_submit 도 anon.
+     4단계 = 사업자 유형 → 상담 종류 → 고민(기장, 하나) / 필요한 신고(신고만, 여러 개 + [다음]) → 휴대폰 번호·[필수] 동의.
+     고르면 바로 다음 단계(메인 신청 창과 같은 넘김 — 화살표로 훑기만 하면 넘기지 않음) · 진행 막대 1/4~4/4.
+     접수 = 메인 예약과 같은 주소·같은 키 순서. 남기실 말씀 = 고른 것 ' · ' + 자리. [선택] 광고 동의 없음 → 들어온 곳 '동의 안 함', form_submit 도 anon.
      '#rsv'(밤 '전화 예약'·계산 창 '전화 예약'·PC 카톡 안내 창 '전화 상담 예약')는 이 쪽에서 신청 창을 연다. */
   var apDlg = $('#ap-dlg');
   if (apDlg) (function () {
     var TELRE = /^(010\d{8}|01[16789]\d{7,8})$/;
-    var bar = $('[data-ap-bar]'), heroCta = $('[data-ap-hero-cta]');
-    var heroOn = true, typing = false, origin = '신청 창', forms = {};
+    var bar = $('[data-ap-bar]'), heroCta = $('[data-ap-hero-cta]'), apHd = $('.ap-hd');
+    var quickCard = $('[data-ap-st="quick"]');
+    var heroOn = true, quickOn = false, menuOn = false, typing = false, units = {};
     var digitsOf = function (v) { var d = String(v || '').replace(/\D/g, ''); return /^8210/.test(d) ? '0' + d.slice(2) : d; };
+    var hdH = function () { return apHd ? apHd.getBoundingClientRect().height : 0; };
 
-    /* 떠 있는 막대: 첫 화면 버튼이 보이는 동안 · 창이 열려 있는 동안 · 번호·업종 칸 입력 중(휴대폰 자판)에는 숨김 */
+    /* 떠 있는 막대: 첫 화면 버튼·첫 화면 신청 칸이 보이는 동안 · 창·메뉴 판이 열려 있는 동안 · 번호 칸 입력 중(휴대폰 자판)에는 숨김 */
     var barSync = function () {
       if (!bar) return;
-      var on = !heroOn && !doc.querySelector('dialog[open]') && !typing;
+      var on = !heroOn && !quickOn && !menuOn && !doc.querySelector('dialog[open]') && !typing;
       bar.classList.toggle('on', on);
       if (on) { bar.removeAttribute('inert'); bar.removeAttribute('aria-hidden'); }
       else { bar.setAttribute('inert', ''); bar.setAttribute('aria-hidden', 'true'); }
     };
-    if (heroCta && IO) new IntersectionObserver(function (es) { heroOn = es[0].isIntersecting; barSync(); }, { rootMargin: '-72px 0px 0px 0px' }).observe(heroCta);
-    else heroOn = false;
+    if (IO) {
+      if (heroCta) new IntersectionObserver(function (es) { heroOn = es[0].isIntersecting; barSync(); }, { rootMargin: '-72px 0px 0px 0px' }).observe(heroCta);
+      if (quickCard) new IntersectionObserver(function (es) { quickOn = es[0].isIntersecting; barSync(); }, { rootMargin: '-60px 0px 0px 0px' }).observe(quickCard);
+    } else heroOn = false;
     if ('MutationObserver' in window) $$('dialog').forEach(function (d) { new MutationObserver(barSync).observe(d, { attributes: true, attributeFilter: ['open'] }); });
-    doc.addEventListener('focusin', function (ev) { var t = ev.target; if (t.matches && t.matches('.ap-in, .ap-sel')) { typing = true; barSync(); } });
+    doc.addEventListener('focusin', function (ev) { var t = ev.target; if (t.matches && t.matches('.ap-in')) { typing = true; barSync(); } });
     doc.addEventListener('focusout', function () { if (!typing) return; typing = false; setTimeout(barSync, 0); });
 
     /* 번호: 치는 대로 010-1234-5678 꼴(+82 10… 은 010…) — 메인과 같음 */
@@ -654,28 +660,83 @@
     var more = function (b, on) { var box = doc.getElementById(b.getAttribute('aria-controls')); if (box) box.hidden = !on; b.setAttribute('aria-expanded', on ? 'true' : 'false'); };
     $$('[data-ap-more]').forEach(function (b) { b.addEventListener('click', function () { more(b, b.getAttribute('aria-expanded') !== 'true'); }); });
 
-    /* 접수(짧은 칸 · 신청 창 공통): 오류는 칸 바로 아래 · 두 번 누름 막음 · 서버가 받았다고 답할 때만 '접수됐어요' */
-    $$('form[data-ap-form]').forEach(function (f) {
-      var kind = f.getAttribute('data-ap-form'), box = f.closest('[data-ap-box]');
-      var tel = $('input[name=tel]', f), ok = $('input[name=ok]', f), go = $('button[type=submit]', f);
+    /* 상담 신청 4단계 부품(첫 화면 칸 · 신청 창 공통) */
+    $$('[data-ap-st]').forEach(function (card) {
+      var kind = card.getAttribute('data-ap-st'), f = $('form', card), steps = $$('.ld-step', f);
+      var lb = $('[data-ld-bar]', card), tip = $('[data-ld-tip]', card), done = $('[data-done]', card), alt = $('.ld-alt', card);
+      var nextB = $('[data-ap-next]', f), tel = $('input[name=tel]', f), ok = $('input[name=ok]', f), go = $('button[type=submit]', f);
       var eTel = $('[data-err="tel"]', f), eOk = $('[data-err="ok"]', f), fail = $('[data-fail]', f);
-      var part = f.closest('[data-ap-part]') || f, done = $('[data-done]', box), busy = false;
+      var cur = '1', busy = false, pend = false, lastKey = '', from = '', ind = '';
+      var val = function (n) { return (f.querySelector('input[name=' + n + ']:checked') || {}).value || ''; };
+      var picks = function () { return $$('input[name=filing]:checked', f).map(function (x) { return x.value; }); };
+      var order = function () { return ['1', '2', val('kind') === '신고만 맡기기' ? '3f' : '3k', '4']; };
       var say = function (el, inp, msg) { el.textContent = msg; el.hidden = !msg; if (msg) inp.setAttribute('aria-invalid', 'true'); else inp.removeAttribute('aria-invalid'); };
       var telErr = function (msg) { say(eTel, tel, msg); tel.parentNode.classList.toggle('bad', !!msg); };
       var idle = function () { busy = false; go.removeAttribute('aria-disabled'); go.removeAttribute('aria-busy'); };
-      var ind = function () { var s = $('select[name=ind]', f); return s ? s.value : ((f.querySelector('input[name=ind]:checked') || {}).value || ''); };
+      var setBiz = function () { card.setAttribute('data-biz', val('biz') === '법인사업자' ? 'corp' : 'ind'); };
+      var syncNext = function () { if (nextB) nextB.disabled = !picks().length; };
+      var show = function (s, user) {
+        cur = s;
+        steps.forEach(function (st) { st.classList.toggle('on', st.getAttribute('data-step') === s); });
+        var n = order().indexOf(s) + 1, pct = n * 25;
+        if (lb) lb.style.width = pct + '%';
+        if (tip) { tip.style.left = 'min(calc(' + pct + '% - 8px), calc(100% - 66px))'; tip.innerHTML = n === 4 ? '거의 <b>다 됐어요!</b>' : '신청까지 <b>10초!</b>'; }
+        if (!user) return;
+        /* 초점: 새 단계 질문(PC 번호 단계는 번호 칸) · 첫 화면 칸은 카드 맨 위가 머리줄 아래로 보이게 */
+        var to = s === '4' && isPC() ? tel : $('.ld-step.on .ld-q', f);
+        if (to) { try { to.focus({ preventScroll: true }); } catch (x) { to.focus(); } }
+        if (kind === 'quick') {
+          var r = card.getBoundingClientRect(), top = hdH() + 8;
+          if (r.top < top) window.scrollBy({ top: r.top - top, behavior: 'auto' });
+        }
+      };
+      var step = function (d) { var o = order(), i = o.indexOf(cur) + d; show(o[Math.max(0, Math.min(o.length - 1, i))], true); };
+      var advance = function (r) {
+        if (pend) return; pend = true;
+        track('rsv_step', { step: cur, value: r.value, position: 'ap_' + kind });
+        setTimeout(function () { pend = false; step(1); }, 160);
+      };
+      f.addEventListener('keydown', function (e) {
+        var r = e.target; if (!r.matches || !r.matches('input[type=radio]')) return;
+        lastKey = e.key;
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (!r.checked) { r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); } advance(r); }
+      });
+      f.addEventListener('click', function (e) {
+        var r = e.target.closest('input[type=radio]'); if (!r) return;
+        var arrow = e.detail === 0 && /^Arrow/.test(lastKey); lastKey = '';
+        if (arrow) return;   /* 화살표로 훑기만 한 것 — Space·Enter·누르기만 넘김 */
+        advance(r);
+      });
+      f.addEventListener('change', function (e) {
+        var n = e.target.name;
+        if (n === 'biz') {   /* 개인/법인이 바뀌면 3단계 고른 것을 비움(글이 다른 칸이 숨은 채 골라져 있지 않게) */
+          setBiz();
+          $$('input[name=worry], input[name=filing]', f).forEach(function (x) { x.checked = false; });
+          syncNext();
+        }
+        if (n === 'filing') syncNext();
+      });
+      if (nextB) nextB.addEventListener('click', function () { if (!picks().length) return; track('rsv_step', { step: '3f', value: picks().join('·'), position: 'ap_' + kind }); step(1); });
+      $$('[data-ld-back]', f).forEach(function (b) { b.addEventListener('click', function () { step(-1); }); });
       tel.addEventListener('input', function () { if (!eTel.hidden) telErr(''); fmt(tel); });
       ok.addEventListener('change', function () { if (ok.checked && !eOk.hidden) say(eOk, ok, ''); });
+      var place = function () { return kind === 'quick' ? '신청 페이지 첫 화면 칸' : from === 'ind' ? '신청 페이지 업종 탭' : '신청 페이지 신청 창'; };
       f.addEventListener('submit', function (ev) {
         ev.preventDefault();
         if (busy) return;
+        /* 앞 단계를 다 고르지 않았으면(번호 칸에서 Enter 등) 그 단계로 */
+        if (!val('biz')) { show('1', true); return; }
+        if (!val('kind')) { show('2', true); return; }
+        var file = val('kind') === '신고만 맡기기';
+        if (file ? !picks().length : !val('worry')) { show(file ? '3f' : '3k', true); return; }
         fail.hidden = true;
         if (!TELRE.test(digitsOf(tel.value))) { telErr('휴대폰 번호를 다시 확인해 주세요'); tel.focus(); return; }
         if (!ok.checked) { say(eOk, ok, '[필수] 동의에 체크해 주세요'); ok.focus(); return; }
         if (!ENDPOINT) { fail.hidden = false; return; }
+        var said = [val('biz'), val('kind')].concat(file ? picks() : [val('worry')]).concat([place()]).join(' · ');
         var data = {
           type: 'lead', '요청': '전화 상담 예약', '이름': '(호칭 없음)', '연락처': tel.value.trim(), '통화 편한 시간': '언제든',
-          '업종': ind() || '(선택 안 함)', '남기실 말씀': '신청 페이지 · ' + (kind === 'quick' ? '첫 화면 칸' : origin),
+          '업종': ind || '(선택 안 함)', '남기실 말씀': said,
           '작년 매출': '-', '직원(4대보험)': '-', '추천 요금제': '-', '예상 기장료': '-',
           '들어온 곳': '(광고 확인 동의 안 함)', '광고': '-', '캠페인': '-', '시안': PAGE,
           '개인정보 수집·이용 동의': '동의함', '_honey': (f.querySelector('[name=hp]') || {}).value || ''
@@ -689,48 +750,81 @@
             if (t === 'bad') { telErr('휴대폰 번호를 다시 확인해 주세요'); tel.focus(); return; }
             if (t !== 'ok' && t !== 'dup' && t !== 'held') { fail.hidden = false; return; }
             track('form_submit', { anon: 1 });
-            part.hidden = true; done.hidden = false;
+            f.hidden = true; done.hidden = false; if (alt) alt.hidden = true;
+            if (tip) tip.hidden = true;
+            if (lb) lb.style.width = '100%';
             try { done.focus(); } catch (x) {}
             barSync();
           })
           .catch(function () { clearTimeout(to); idle(); fail.hidden = false; });
       });
-      forms[kind] = {
-        sent: function () { return !done.hidden; },
-        reset: function () {
-          f.reset(); telErr(''); say(eOk, ok, ''); fail.hidden = true; idle();
-          $$('[data-ap-more]', f).forEach(function (b) { more(b, false); });
-          part.hidden = false; done.hidden = true;
-        }
+      var reset = function () {
+        f.reset(); telErr(''); say(eOk, ok, ''); fail.hidden = true; idle(); pend = false;
+        $$('[data-ap-more]', f).forEach(function (b) { more(b, false); });
+        f.hidden = false; done.hidden = true; if (alt) alt.hidden = false; if (tip) tip.hidden = false;
+        from = ''; ind = ''; setBiz(); syncNext(); show('1');
       };
+      var rs = $('[data-ap-restart]', card);
+      if (rs) rs.addEventListener('click', function () { reset(); var q = $('.ld-step.on .ld-q', f); if (q) { try { q.focus({ preventScroll: true }); } catch (x) { q.focus(); } } });
+      units[kind] = {
+        reset: reset,
+        /* 업종 탭에서 열면: 그 업종 · 개인/법인을 미리 골라 2단계부터 */
+        preset: function (o) {
+          reset(); from = o.from || ''; ind = o.ind || '';
+          if (o.biz) { $$('input[name=biz]', f).forEach(function (r) { r.checked = r.value === o.biz; }); setBiz(); show('2'); }
+        },
+        q: function () { return $('.ld-step.on .ld-q', f); }
+      };
+      reset();
     });
 
-    /* 신청 창: [상담 신청하기]·업종 탭 버튼(그 업종이 골라진 채)·'#rsv' → 열기 · 접수 뒤 닫으면 다음엔 빈 칸으로 */
-    var D = forms.dlg;
-    var openAp = function (from, ind, kb) {
+    /* 신청 창: [상담 신청하기]·업종 탭 버튼·'#rsv' → 열 때마다 처음부터(업종 탭은 2단계부터) */
+    var D = units.dlg;
+    var openAp = function (o) {
+      menu(false);
       var od = doc.querySelector('dialog[open]'); if (od && od !== apDlg) closeDlg(od);
-      if (D && D.sent()) D.reset();
-      origin = from;
-      if (ind) $$('input[name=ind]', apDlg).forEach(function (r) { r.checked = r.value === ind; });
+      if (D) D.preset(o);
       openDlg(apDlg);
-      var to = kb || isPC() ? $('#d-tel', apDlg) : $('#d-t', apDlg);   /* 손가락으로 열면 자판이 바로 뜨지 않게 제목에 초점 */
+      var to = D ? D.q() : null;
       if (to) { try { to.focus({ preventScroll: true }); } catch (x) { to.focus(); } }
+      apDlg.scrollTop = 0;
       barSync();
     };
     apDlg.addEventListener('click', function (ev) { if (ev.target === apDlg || ev.target.closest('[data-close]')) closeDlg(apDlg); });
-    apDlg.addEventListener('close', function () { if (D && D.sent()) D.reset(); barSync(); });
+    apDlg.addEventListener('close', barSync);
     doc.addEventListener('click', function (ev) {
       var o = ev.target.closest('[data-ap-open]');
       if (o) {
         ev.preventDefault();
         var ind = o.getAttribute('data-ind') || '';
-        openAp(ind ? '업종 탭(' + ind + ')' : '신청 창', ind, ev.detail === 0);
+        openAp(ind ? { from: 'ind', ind: ind, biz: ind === '법인' ? '법인사업자' : '개인사업자' } : {});
         track('rsv_open', { position: 'ap_' + o.getAttribute('data-ap-open') });
         return;
       }
       var r = ev.target.closest('a[href="#rsv"]');
-      if (r) { ev.preventDefault(); openAp('신청 창', '', ev.detail === 0); track('rsv_open', { position: r.getAttribute('data-track') || '' }); }
+      if (r) { ev.preventDefault(); openAp({}); track('rsv_open', { position: r.getAttribute('data-track') || '' }); }
     });
+
+    /* 머리줄 메뉴(1024 미만): ≡ → 아래로 펼치는 판 · 메뉴를 누르면 그 칸으로 가며 닫힘 · Esc·바깥 누름·초점이 머리줄 밖으로 나가면 닫힘 */
+    var mb = $('[data-ap-menu]'), mp = $('#ap-menu');
+    function menu(on, back) {
+      if (!mb || !mp || menuOn === on) return;
+      menuOn = on; mp.hidden = !on;
+      mb.setAttribute('aria-expanded', on ? 'true' : 'false');
+      if (apHd) apHd.classList.toggle('menu', on);
+      if (!on && back) { try { mb.focus(); } catch (x) {} }
+      if (on) track('menu_open', {});
+      barSync();
+    }
+    if (mb && mp) {
+      mb.addEventListener('click', function () { menu(!menuOn); });
+      mp.addEventListener('click', function (ev) { if (ev.target.closest('a')) menu(false); });
+      doc.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && menuOn) { ev.preventDefault(); menu(false, true); } });
+      doc.addEventListener('click', function (ev) { if (menuOn && apHd && !apHd.contains(ev.target)) menu(false); });
+      if (apHd) apHd.addEventListener('focusout', function (ev) { if (menuOn && ev.relatedTarget && !apHd.contains(ev.relatedTarget)) menu(false); });
+      window.addEventListener('resize', function () { if (menuOn && window.innerWidth >= 1024) menu(false); }, { passive: true });
+    }
+    $$('.ap-nav a, [data-ap-nav]').forEach(function (a) { a.addEventListener('click', function () { track('nav_click', { position: a.getAttribute('href').slice(1) }); }); });
 
     /* 탭(업종 · 개인/법인): 누르기 · ←→ Home End 로 바꾸고 고른 탭은 줄 안에서 보이게 */
     var tabset = function (list, after) {
@@ -777,6 +871,8 @@
         if (open) track('price_acc', { item: h.textContent });
       });
     });
+    /* 자주 묻는 질문: 펼친 질문 셈 */
+    $$('.ap-qa').forEach(function (d) { d.addEventListener('toggle', function () { if (d.open) track('faq_open', { item: ($('summary', d) || d).textContent.trim().slice(0, 20) }); }); });
     barSync();
   })();
 })();
