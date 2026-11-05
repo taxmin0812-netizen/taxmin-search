@@ -876,3 +876,20 @@
     barSync();
   })();
 })();
+
+/* ── 22차-4c 서비스 소개 업종 사진: 3초마다 한 장씩 저절로 넘김(끝이면 처음으로) · 누르거나 손가락·마우스를 올리면 잠시 멈춤 · 움직임 줄이기 설정이면 안 함 ── */
+(function () {
+  var g = document.querySelector('[data-ap-auto]');
+  if (!g || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  var hold = 0, seen = true;
+  var stop = function () { hold = Date.now() + 6000; };
+  ['pointerenter', 'pointerdown', 'touchstart', 'focusin', 'wheel'].forEach(function (t) { g.addEventListener(t, stop, { passive: true }); });
+  if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { seen = es[0].isIntersecting; }).observe(g);
+  setInterval(function () {
+    if (!seen || Date.now() < hold || document.hidden || document.querySelector('dialog[open]')) return;
+    var li = g.querySelector('li'); if (!li) return;
+    var step = li.getBoundingClientRect().width + parseFloat(getComputedStyle(g).columnGap || getComputedStyle(g).gap || 12);
+    var end = g.scrollWidth - g.clientWidth - 4;
+    g.scrollTo({ left: g.scrollLeft >= end ? 0 : g.scrollLeft + step, behavior: 'smooth' });
+  }, 3000);
+})();

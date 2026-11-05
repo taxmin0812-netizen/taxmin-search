@@ -2871,3 +2871,7 @@ html.tm-off .ld-ic.tel { display: none; }
   .ap-fit-g { gap: 16px; margin-left: 0; margin-right: 0; padding: 0 0 6px; scroll-padding: 0; }
   .ap-fit-g li { flex-basis: 220px; }
 }
+
+/* ── 22차-4c 안내 글은 한 줄(넘치면 말줄임) ── */
+.ap-fit-n, [data-page="apply"] .ap-ind-b, [data-page="apply"] .ap-incl-t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ap-fit-l li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
