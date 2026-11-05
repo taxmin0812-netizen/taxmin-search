@@ -2778,3 +2778,17 @@ html.tm-off .ld-ic.tel { display: none; }
   .ap-hd.on .ap-nav a:hover { background: var(--ap-g); }
   .ap-menu-b, .ap-menu { display: none; }
 }
+
+/* ── 22차-3 메뉴 쪽(price.html · tax.html · faq.html) 머리 칸: 투명 머리줄 아래 남색 칸(흰 글) ── */
+.ap-sub { background: #0B1530; color: #fff; padding: 108px 0 40px; }
+.ap-sub h1 { font-size: 30px; line-height: 40px; font-weight: 800; letter-spacing: -0.02em; }
+.ap-sub-l { margin-top: 8px; font-size: 15px; line-height: 23px; color: rgba(255, 255, 255, .82); }
+.ap-sub-cta { margin-top: 20px; }
+.ap-sub-cta .ap-btn { min-width: 180px; }
+.ap-nav a[aria-current="page"] { text-decoration: underline; text-underline-offset: 8px; text-decoration-thickness: 2px; }
+.ap-menu-l a[aria-current="page"] { color: #2554F0; }
+@media (min-width: 960px) {
+  .ap-sub { padding: 136px 0 56px; }
+  .ap-sub h1 { font-size: 44px; line-height: 56px; }
+  .ap-sub-l { font-size: 18px; line-height: 28px; }
+}
