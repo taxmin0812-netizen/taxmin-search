@@ -307,7 +307,7 @@
       if (S.rev) R.rev = revText(g, S.rev);
       if (S.emp) R.emp = EMP_NAME[S.emp];
       var t = S.rev === 'mid' ? 'P' : S.rev === 'hi' ? 'S' : 'L';
-      if (t === 'L' && S.emp === '6') { t = 'P'; R.why = '4대보험 직원이 6명 이상이면 중간 구간이에요.'; }
+      if (t === 'L' && S.emp === '6') { t = 'P'; R.why = '직원·알바가 6명 이상이면 중간 구간이에요.'; }
       R.from = !(S.rev && S.emp);
       if (t === 'L') { R.tier = '기본 구간'; if (S.emp === '5') { R.price = '월 6만원'; R.won = [60000]; } else if (S.emp === '3') { R.price = '월 5만원'; R.won = [50000]; } else { R.price = R.from ? '월 4만원부터' : '월 4만원'; R.won = [40000]; } }
       else if (t === 'P') { R.tier = '중간 구간'; R.price = '월 7~8만원'; R.won = [70000, 80000]; if (!R.why) R.why = '작년 매출이 ' + bb.lo + '을 넘으면 중간 구간이에요.'; }
@@ -325,15 +325,15 @@
       var R = compute();
       var hint = !S.ind ? '업종부터 골라 주세요.' : R.corp ? '' : !S.rev ? '작년 매출을 고르면 더 정확해져요.' : !S.emp ? '직원 수를 고르면 확정돼요.' : '';
       var g0 = IND_G[S.ind], bb0 = BAND[g0];
-      var base = !S.ind ? '' : R.corp ? '법인' : R.ind + ' · 작년 매출 ' + R.rev + ' · 4대보험 직원 ' + R.emp;
-      var chg = (S.ind && !R.corp && S.rev === 'lo' && (S.emp === '0' || S.emp === '3') && bb0) ? (S.emp === '0' ? '직원이 생기거나 작년 매출이 ' + bb0.lo + '을 넘으면 달라져요' : '작년 매출이 ' + bb0.lo + '을 넘거나 직원이 4명 이상이면 달라져요') : '';
+      var base = !S.ind ? '' : R.corp ? '법인' : R.ind + ' · 작년 매출 ' + R.rev + ' · 직원·알바 ' + R.emp;
+      var chg = (S.ind && !R.corp && S.rev === 'lo' && (S.emp === '0' || S.emp === '3') && bb0) ? (S.emp === '0' ? '직원·알바가 생기거나 작년 매출이 ' + bb0.lo + '을 넘으면 달라져요' : '작년 매출이 ' + bb0.lo + '을 넘거나 직원이 4명 이상이면 달라져요') : '';
       cres.innerHTML = '<p class="lbl">예상 기장료' + (R.tier ? ' · ' + esc(R.tier) : '') + '</p>' +
         '<p class="price num">' + esc(R.price) + '<small>부가세 별도</small></p>' +
         (S.ind ? '<p class="incl num">' + inclLine(R) + '</p>' : '') +
         (R.why ? '<p class="why">' + esc(R.why) + '</p>' : '') +
         (hint ? '<p class="incl">' + hint + '</p>' : '') +
         (S.ind ? '<dl class="cd-dl"><div><dt>기준</dt><dd>' + esc(base) + '</dd></div>' +
-          '<div><dt>포함</dt><dd>장부 정리 · 부가세 신고 · 직원 월급 신고 · <span class="nw">매달 매출 보고서</span></dd></div>' +
+          '<div><dt>포함</dt><dd>장부 정리 · 부가세 신고 · ' + (S.emp && S.emp !== '0' ? '직원·알바 월급 신고 · ' : '') + '<span class="nw">매달 매출 보고서</span></dd></div>' +
           '<div><dt>별도</dt><dd>' + (R.corp ? '법인세' : '종합소득세') + ' 신고비(1년 1번 · 신고 전에 <span class="nw">금액 안내</span>)</dd></div>' +
           (chg ? '<div><dt>달라지면</dt><dd>' + esc(chg) + '</dd></div>' : '') + '</dl>' : '');
       cres.classList.toggle('done', R.done);
@@ -342,7 +342,7 @@
       LAST = S.ind ? {
         R: R,
         /* 값 없는 줄('-')은 빼고, 법인은 '법인'을 두 번 쓰지 않음 */
-        text: ['[택스민 기장료 상담]', '업종: ' + R.ind, R.rev !== '-' ? '작년 매출: ' + R.rev : '', R.emp !== '-' ? '4대보험 직원: ' + R.emp : '',
+        text: ['[택스민 기장료 상담]', '업종: ' + R.ind, R.rev !== '-' ? '작년 매출: ' + R.rev : '', R.emp !== '-' ? '직원·알바: ' + R.emp : '',
           '예상 기장료: ' + R.price + ' (부가세 별도' + (R.tier && !R.corp ? ', ' + R.tier : '') + ')',
           '(안내 번호 ' + ({ naver_ad: 'N', google_ad: 'G' }[SRC.key] || 'W') + '-' + PAGE.replace(/^[a-z]+-/, '') + ')'].filter(Boolean).join('\n')
       } : null;
