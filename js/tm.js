@@ -935,14 +935,23 @@
   sync();
   new MutationObserver(sync).observe(list, { subtree: true, attributes: true, attributeFilter: ['aria-selected'] });
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  var hold = 0, seen = false;
-  var stop = function () { hold = Date.now() + 10000; };
-  ['pointerdown', 'keydown', 'touchstart', 'focusin', 'pointerenter'].forEach(function (e) { sec.addEventListener(e, stop, { passive: true }); });
-  if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { seen = es[0].isIntersecting; }, { threshold: 0.35 }).observe(sec);
+  /* 28차: 처음엔 칸이 보이고 3초 뒤 첫 넘김, 그다음 4초마다. 스크롤·손가락 스침으로는 멈추지 않고, 업종을 직접 누를 때만 8초 쉼 */
+  var seen = false, next = 0;
+  var wait = function (ms) { next = Date.now() + ms; };
+  list.addEventListener('pointerdown', function () { wait(8000); }, { passive: true });
+  list.addEventListener('keydown', function () { wait(8000); });
+  if ('IntersectionObserver' in window) new IntersectionObserver(function (es) {
+    var v = es[0].isIntersecting;
+    if (v && !seen) wait(3000);
+    seen = v;
+  }, { threshold: 0.4 }).observe(sec);
   setInterval(function () {
-    if (!seen || Date.now() < hold || document.hidden || document.querySelector('dialog[open]')) return;
+    if (!seen) return;
+    if (document.hidden || document.querySelector('dialog[open]')) { if (next < Date.now() + 2000) wait(2000); return; }
+    if (Date.now() < next) return;
     var tabs = [].slice.call(list.querySelectorAll('[role=tab]'));
     var i = tabs.findIndex(function (t) { return t.getAttribute('aria-selected') === 'true'; });
     var nx = tabs[(i + 1) % tabs.length]; if (nx) nx.click();
-  }, 4000);
+    wait(4000);
+  }, 200);
 })();
