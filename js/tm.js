@@ -918,3 +918,31 @@
     g.scrollTo({ left: g.scrollLeft >= end ? 0 : g.scrollLeft + step, behavior: 'smooth' });
   }, 3000);
 })();
+
+/* ── 27차 업종 칸: 누르지 않아도 4초마다 다음 업종으로 자연스럽게 넘어감(사진은 겹쳐 사라짐 · 글은 살짝 떠오름)
+   누르거나 손가락·마우스를 올리면 10초 멈춤 · 화면에 보일 때만 · 신청 창이 열려 있으면 멈춤 · 움직임 줄이기 설정이면 안 넘김 */
+(function () {
+  var sec = document.querySelector('[data-page="apply"] .ap-ind');
+  if (!sec) return;
+  var list = sec.querySelector('[role=tablist]');
+  if (!list) return;
+  var pics = [].slice.call(sec.querySelectorAll('[data-ind-pic]'));
+  var sync = function () {
+    var t = list.querySelector('[aria-selected="true"]'); if (!t) return;
+    var k = t.id.replace(/^it-/, '');
+    pics.forEach(function (p) { p.hidden = false; p.classList.toggle('on', p.getAttribute('data-ind-pic') === k); });
+  };
+  sync();
+  new MutationObserver(sync).observe(list, { subtree: true, attributes: true, attributeFilter: ['aria-selected'] });
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var hold = 0, seen = false;
+  var stop = function () { hold = Date.now() + 10000; };
+  ['pointerdown', 'keydown', 'touchstart', 'focusin', 'pointerenter'].forEach(function (e) { sec.addEventListener(e, stop, { passive: true }); });
+  if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { seen = es[0].isIntersecting; }, { threshold: 0.35 }).observe(sec);
+  setInterval(function () {
+    if (!seen || Date.now() < hold || document.hidden || document.querySelector('dialog[open]')) return;
+    var tabs = [].slice.call(list.querySelectorAll('[role=tab]'));
+    var i = tabs.findIndex(function (t) { return t.getAttribute('aria-selected') === 'true'; });
+    var nx = tabs[(i + 1) % tabs.length]; if (nx) nx.click();
+  }, 4000);
+})();

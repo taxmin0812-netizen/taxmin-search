@@ -3010,3 +3010,13 @@ html.tm-off [data-page="apply"] .ap-trust { display: none; }
 .ap-way-o span { display: inline-flex; align-items: center; justify-content: center; min-width: 64px; height: 40px; padding: 0 14px; border-radius: 10px; box-shadow: inset 0 0 0 1px #C5CDDA; font-size: 15px; font-weight: 600; color: #3C4658; background: #fff; }
 .ap-way-o input:checked + span { box-shadow: inset 0 0 0 1.5px #0B1530; color: #0B1530; background: #F6F7F9; }
 .ap-way-o input:focus-visible + span { outline: 2px solid #2554F0; outline-offset: 2px; }
+
+/* ── 27차 업종 칸 자동 넘김: 사진 겹쳐 바뀜 · 글 살짝 떠오름 ── */
+[data-page="apply"] .ap-ind-ph { opacity: 0; transition: opacity .7s ease; }
+[data-page="apply"] .ap-ind-ph.on { opacity: 1; }
+[data-page="apply"] .ap-ind-p:not([hidden]) { animation: apIndIn .5s ease both; }
+@keyframes apIndIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  [data-page="apply"] .ap-ind-ph { transition: none; }
+  [data-page="apply"] .ap-ind-p:not([hidden]) { animation: none; }
+}
