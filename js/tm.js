@@ -752,7 +752,7 @@
         var ex = est();
         var said = [val('biz'), calcR ? '기장료 계산 ' + calcR.price : '작년 매출 ' + val('rev'), calcR ? '' : (val('emp') === '직원 없음' ? '직원 없음' : '직원 ' + val('emp')), '예상 ' + ex[0], place()].filter(Boolean).join(' · ');
         var data = {
-          type: 'lead', '요청': '전화 상담 예약', '이름': '(호칭 없음)', '연락처': tel.value.trim(), '통화 편한 시간': '언제든',
+          type: 'lead', '요청': '전화 상담 예약', '이름': '(호칭 없음)', '연락처': tel.value.trim(), '통화 편한 시간': val('way') === '문자' ? '문자로 연락 원함' : '언제든',
           '업종': ind || '(선택 안 함)', '남기실 말씀': said,
           '작년 매출': calcR ? calcR.rev : (val('rev') || '-'), '직원(4대보험)': calcR ? calcR.emp : (val('emp') || '-'), '추천 요금제': calcR ? calcR.tier : '-', '예상 기장료': ex[0] + ' (부가세 별도)',
           '들어온 곳': '(광고 확인 동의 안 함)', '광고': '-', '캠페인': '-', '시안': PAGE,
@@ -767,6 +767,7 @@
             if (t === 'bad') { telErr('휴대폰 번호를 다시 확인해 주세요'); tel.focus(); return; }
             if (t !== 'ok' && t !== 'dup' && t !== 'held') { fail.hidden = false; return; }
             track('form_submit', {});
+            var ds = $('[data-done-s]', card); if (ds) ds.textContent = '평일 10:00–17:30에 ' + (val('way') === '문자' ? '문자드릴게요' : '전화드릴게요');
             f.hidden = true; done.hidden = false; if (alt) alt.hidden = true;
             if (tip) tip.hidden = true;
             if (lb) lb.style.width = '100%';

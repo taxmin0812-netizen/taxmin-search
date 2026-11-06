@@ -3001,3 +3001,12 @@ html.tm-off [data-page="apply"] .ap-trust { display: none; }
   [data-page="apply"] .ap-plan-k { font-size: 20px; line-height: 28px; }
   [data-page="apply"] .ap-band-in { padding-top: 80px; padding-bottom: 80px; }
 }
+
+/* ── 25차 받고 싶은 연락(전화/문자) ── */
+.ap-way { display: flex; align-items: center; gap: 8px; margin: 12px 0 4px; }
+.ap-way-l { margin-right: 4px; font-size: 14px; font-weight: 600; color: #3C4658; }
+.ap-way-o { position: relative; }
+.ap-way-o input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.ap-way-o span { display: inline-flex; align-items: center; justify-content: center; min-width: 64px; height: 40px; padding: 0 14px; border-radius: 10px; box-shadow: inset 0 0 0 1px #C5CDDA; font-size: 15px; font-weight: 600; color: #3C4658; background: #fff; }
+.ap-way-o input:checked + span { box-shadow: inset 0 0 0 1.5px #0B1530; color: #0B1530; background: #F6F7F9; }
+.ap-way-o input:focus-visible + span { outline: 2px solid #2554F0; outline-offset: 2px; }
